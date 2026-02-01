@@ -56,10 +56,10 @@ function isAuthorized(req) {
   }
 }
 
-// Check if book routes need authentication (DELETE/PUT operations)
-const bookRouteNeedsAuth = (req) => {
-  const needsAuth = req.url.match(/books/) && (req.method === "DELETE" || req.method === "PUT");
-  if (needsAuth) console.log(`🔒 [ROUTE] Book route requires auth: ${req.method} ${req.url}`);
+// Check if policy routes need authentication (DELETE/PUT operations)
+const policyRouteNeedsAuth = (req) => {
+  const needsAuth = req.url.match(/policies/) && (req.method === "DELETE" || req.method === "PUT");
+  if (needsAuth) console.log(`🔒 [ROUTE] Policy route requires auth: ${req.method} ${req.url}`);
   return needsAuth;
 };
 
@@ -75,7 +75,7 @@ server.use((req, res, next) => {
   console.log(`🌐 [MIDDLEWARE] Auth check for ${req.method} ${req.url}`);
   
   if (
-    (bookRouteNeedsAuth(req) || userRouteNeedsAuth(req)) &&
+    (policyRouteNeedsAuth(req) || userRouteNeedsAuth(req)) &&
     !isAuthorized(req)
   ) {
     console.log(`❌ [RESPONSE] Sending 401 Unauthorized for ${req.method} ${req.url}`);
@@ -97,7 +97,7 @@ server.use((req, res, next) => {
     console.log(`📝 [POST] Processing POST request`);
     
     // Validate book title for POST requests
-    if ((req.path === "/books" || req.path === "/books/") && !req.body.title) {
+    if ((req.path === "/polcies" || req.path === "/policies/") && !req.body.title) {
       console.log(`❌ [VALIDATION] Title is required for book creation`);
       console.log(`📤 [RESPONSE] Sending 500 error: Title cannot be null`);
       res.status(500).send({ error: "Title cannot be null" });
@@ -146,33 +146,32 @@ router.render = (req, res) => {
 };
 
 
-// Custom search endpoint for books
-server.get("/books/search", (req, res) => {
-  console.log(`🔍 [SEARCH] Book search API called`);
+// Custom search endpoint for policies
+server.get("/policies/search", (req, res) => {
+  console.log(`🔍 [SEARCH] Policy search API called`);
   console.log(`📥 [INPUT] Search parameters:`, JSON.stringify(req.query, null, 2));
   
   const db = router.db;
   console.log(`💾 [DATABASE] Accessing books collection`);
 
-  const books = db
-    .get("books")
-    .filter(
-      (r) => {
-        const titleMatch = req.query.title
-          ? r.title.toLowerCase().includes(req.query.title.toLowerCase())
-          : true;
-        const authorMatch = req.query.author
-          ? r.author.toLowerCase().includes(req.query.author.toLowerCase())
-          : true;
-        
-        return titleMatch && authorMatch;
-      }
-    )
-    .value();
+const policies = db
+  .get("policies")
+  .filter((r) => {
+    const policyIdMatch = req.query.policy_id
+      ? r.policy_id === Number(req.query.policy_id)
+      : true;
 
-  console.log(`🔍 [SEARCH] Found ${books.length} matching books`);
-  console.log(`📤 [RESPONSE] Sending search results:`, JSON.stringify(books, null, 2));
-  res.status(200).send(books);
+    const customerIdMatch = req.query.customer_id
+      ? r.customer_id === Number(req.query.customer_id)
+      : true;
+
+    return policyIdMatch && customerIdMatch;
+  })
+  .value();
+
+  console.log(`🔍 [SEARCH] Found ${policies.length} matching policies`);
+  console.log(`📤 [RESPONSE] Sending search results:`, JSON.stringify(policies, null, 2));
+  res.status(200).send(policies);
 });
 
 // Apply JSON Server router for default CRUD operations
@@ -191,7 +190,7 @@ const PORT = process.env.PORT || 80;
 server.listen(PORT, () => {
   console.log(`🚀 [SERVER] Server running on port: ${PORT}`);
   console.log(`🌐 [SERVER] Environment: ${env}`);
-  console.log(`📚 [SERVER] Books API is ready!`);
+  console.log(`📚 [SERVER] Policies API is ready!`);
 });
 
 module.exports = server;
