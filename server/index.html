@@ -1,10 +1,19 @@
-<h1>Add a book</h1>
+<h1>New Policy</h1>
 
 <form>
-  <input type='text' id='title' placeholder='Title' />
-  <input type='text' id='author' placeholder='Author' />
-  <input type='text' id='isbn' placeholder='ISBN' />
-  <input type='text' id='releaseDate' placeholder='Release Date' />
+  <label for="customer_id">Customer ID:</label>
+  <input type='text' id='customer_id'/><br><br>
+  <label for="policy_type">Policy ID:</label>
+  <label for="policy_type">Choose a Policy Type:</label>
+   <select name="policy_type" id="policy_type">
+    <option value="apple">Home</option>
+    <option value="banana">Automotive</option>
+    <option value="orange">Renters</option>
+   </select><br><br>
+  <label for="start_date">Start Date:</label>
+  <input type="date" id="start_date" name="start_date"><br><br>
+  <label for="start_date">End Date:</label>
+  <input type="date" id="end_date" name="end_date"><br><br>
 
   <input type='submit' value='Submit' />
 </form>
@@ -17,23 +26,23 @@ crossorigin="anonymous"></script>
 $('form').on('submit', (e) => {
   e.preventDefault();
   const data = {
-    'title': $('#title').val(),
-    'author': $('#author').val(),
-    'isbn': $('#isbn').val(),
-    'releaseDate': $('#releaseDate').val()
+    'customer_id': $('#customer_id').val(),
+    'policy_type': $('#policy_type').val(),
+    'start_date': $('#start_date').val(),
+    'end_date': $('#end_date').val()
   };
 
   var settings = {
     "async": true,
     "crossDomain": true,
-    "url": "http://localhost:80/books",
+    "url": "http://localhost:80/policies",
     "method": "POST",
     "headers": {
       "content-type": "application/json",
       "g-token": "ITEXPS",
       "cache-control": "no-cache",
       "postman-token": "94e03697-36ba-33d0-bf88-eae6aeb4380e"
-    },
+    },//still need to update for proper tokening
     "data": JSON.stringify(data)
   }
 
