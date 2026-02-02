@@ -1,0 +1,39 @@
+CREATE TABLE claims (
+    claim_id INT AUTO_INCREMENT,
+    policy_id INT NOT NULL,
+    coverage_id INT NOT NULL,
+    claim_type ENUM('Collision', 'Fire', 'Health') NOT NULL,
+    claim_amount DECIMAL(12,2) NOT NULL,
+    claim_date DATE NOT NULL,
+    status ENUM('Submitted', 'Approved', 'Rejected') NOT NULL DEFAULT 'Submitted',
+);
+
+INSERT INTO claims
+(policy_id, coverage_id, claim_type, claim_amount, claim_date, status)
+VALUES
+(1001, 1, 'Collision', 4500.00, '2025-01-15', 'Approved'),
+(1001, 2, 'Fire', 7000.00, '2025-02-10', 'Submitted'),
+(1001, 3, 'Health', 12000.00, '2025-03-05', 'Approved'),
+
+(1002, 4, 'Collision', 8000.00, '2025-01-22', 'Approved'),
+(1002, 5, 'Fire', 6000.00, '2025-02-18', 'Rejected'),
+(1002, 6, 'Health', 15000.00, '2025-03-12', 'Submitted'),
+
+(1003, 7, 'Collision', 9500.00, '2025-01-30', 'Approved'),
+(1003, 8, 'Fire', 4000.00, '2025-02-25', 'Rejected'),
+(1003, 9, 'Health', 11000.00, '2025-03-20', 'Submitted'),
+
+(1004, 10, 'Collision', 5200.00, '2025-01-18', 'Approved'),
+(1004, 11, 'Fire', 6500.00, '2025-02-14', 'Approved'),
+(1004, 12, 'Health', 9800.00, '2025-03-08', 'Rejected'),
+
+(1005, 13, 'Collision', 8700.00, '2025-01-27', 'Submitted'),
+(1005, 14, 'Fire', 7200.00, '2025-02-21', 'Approved'),
+(1005, 15, 'Health', 16000.00, '2025-03-16', 'Rejected'),
+
+(1006, 16, 'Collision', 6300.00, '2025-01-12', 'Approved'),
+(1006, 17, 'Fire', 5400.00, '2025-02-06', 'Submitted'),
+(1006, 18, 'Health', 14000.00, '2025-03-01', 'Approved'),
+
+(1007, 19, 'Collision', 9100.00, '2025-02-03', 'Approved');
+

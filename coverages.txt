@@ -1,0 +1,38 @@
+CREATE TABLE coverages (
+  coverage_id INT,
+  policy_id INT,
+  coverage_type VARCHAR(20),
+  limit_amount DECIMAL(10,2),
+  deductible DECIMAL(10,2),
+  is_active BOOLEAN
+)
+
+INSERT INTO coverages 
+(coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active)
+VALUES
+(1, 1001, 'Collision', 20000.00, 500.00, TRUE),
+(2, 1001, 'Fire', 15000.00, 1000.00, TRUE),
+(3, 1001, 'Health', 50000.00, 2000.00, TRUE),
+
+(4, 1002, 'Collision', 25000.00, 750.00, TRUE),
+(5, 1002, 'Fire', 18000.00, 1200.00, TRUE),
+(6, 1002, 'Health', 60000.00, 2500.00, TRUE),
+
+(7, 1003, 'Collision', 30000.00, 1000.00, TRUE),
+(8, 1003, 'Fire', 20000.00, 1500.00, FALSE),
+(9, 1003, 'Health', 55000.00, 2200.00, TRUE),
+
+(10, 1004, 'Collision', 22000.00, 600.00, TRUE),
+(11, 1004, 'Fire', 17000.00, 1100.00, TRUE),
+(12, 1004, 'Health', 48000.00, 1800.00, TRUE),
+
+(13, 1005, 'Collision', 27000.00, 800.00, TRUE),
+(14, 1005, 'Fire', 19000.00, 1300.00, TRUE),
+(15, 1005, 'Health', 62000.00, 2600.00, FALSE),
+
+(16, 1006, 'Collision', 24000.00, 700.00, TRUE),
+(17, 1006, 'Fire', 16000.00, 1000.00, TRUE),
+(18, 1006, 'Health', 53000.00, 2100.00, TRUE),
+
+(19, 1007, 'Collision', 26000.00, 900.00, TRUE),
+(20, 1007, 'Fire', 18500.00, 1250.00, TRUE);
