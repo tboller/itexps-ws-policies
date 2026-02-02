@@ -2,20 +2,25 @@ const express = require("express");
 const app = express();
 const port = 3000;
 const policiesRouter = require("./routes/policies");
-const claimsRouter = require("./routes/claims");
-const coveragesRouter = require("./routes/coverages");
+// const claimsRouter = require("./routes/claims");
+// const coveragesRouter = require("./routes/coverages");
 app.use(express.json());
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
+
+//Base route that simply displays messsage of 'ok'
 app.get("/", (req, res) => {
   res.json({ message: "ok" });
 });
+
+/* Routers */
 app.use("/policies", policiesRouter);
 app.use("/claims", claimsRouter);
 app.use("/coverages", coveragesRouter);
+
 /* Error handler middleware */
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
