@@ -3,7 +3,7 @@ const router = express.Router();
 const policies = require('../services/policies');
 
 /* GET policies. */
-router.get('/policies', async function(req, res, next) {
+router.get('/', async function(req, res, next) {
   try {
     res.json(await policies.getMultiple(req.query.page));
   } catch (err) {
@@ -12,8 +12,8 @@ router.get('/policies', async function(req, res, next) {
   }
 });
 
-/* POST policiess */
-router.post('/policies', async function(req, res, next) {
+/* POST policies */
+router.post('/', async function(req, res, next) {
   try {
     res.json(await policies.create(req.body));
   } catch (err) {
