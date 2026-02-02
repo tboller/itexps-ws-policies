@@ -96,22 +96,16 @@ server.use((req, res, next) => {
   if (req.method === "POST") {
     console.log(`📝 [POST] Processing POST request`);
     
-    // Validate book title for POST requests
-    if ((req.path === "/polcies" || req.path === "/policies/") && !req.body.title) {
-      console.log(`❌ [VALIDATION] Title is required for book creation`);
-      console.log(`📤 [RESPONSE] Sending 500 error: Title cannot be null`);
-      res.status(500).send({ error: "Title cannot be null" });
+    // Validate customer_id exists for POST requests
+    if ((req.path === "/polcies" || req.path === "/policies/") && !req.body.customer_id) {
+      console.log(`❌ [VALIDATION] Customer ID is required for policy creation`);
+      console.log(`📤 [RESPONSE] Sending 500 error: Customer ID cannot be null`);
+      res.status(500).send({ error: "Customer ID cannot be null" });
       return;
     }
-    
-    // Add timestamps for POST requests
-    req.body.createdAt = new Date().toISOString();
-    req.body.updatedAt = new Date().toISOString();
-    console.log(`⏰ [TIMESTAMP] Added createdAt and updatedAt timestamps`);
     next();
   } else if (req.method === "PUT") {
-    console.log(`✏️ [PUT] Converting PUT to PATCH and adding updatedAt timestamp`);
-    req.body.updatedAt = new Date().toISOString();
+    console.log(`✏️ [PUT] Converting PUT to PATCH`);
     req.method = "PATCH";
     next();
   } else {
@@ -152,7 +146,7 @@ server.get("/policies/search", (req, res) => {
   console.log(`📥 [INPUT] Search parameters:`, JSON.stringify(req.query, null, 2));
   
   const db = router.db;
-  console.log(`💾 [DATABASE] Accessing books collection`);
+  console.log(`💾 [DATABASE] Accessing policies collection`);
 
 const policies = db
   .get("policies")
