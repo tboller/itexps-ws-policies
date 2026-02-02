@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const port = 3000;
-const programmingLanguagesRouter = require("./routes/programmingLanguages");
+const policiesRouter = require("./routes/policies");
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -11,7 +11,7 @@ app.use(
 app.get("/", (req, res) => {
   res.json({ message: "ok" });
 });
-app.use("/programming-languages", programmingLanguagesRouter);
+app.use("/policies", policiesRouter);
 /* Error handler middleware */
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
@@ -20,5 +20,5 @@ app.use((err, req, res, next) => {
   return;
 });
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Policies API listening at http://localhost:${port}`);
 });
