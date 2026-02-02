@@ -2,19 +2,60 @@ const db = require('./db');
 const helper = require('../helper');
 const config = require('../config');
 
-async function getMultiple(page = 1){
+/**
+ * GET policies by Customer ID
+ */
+async function getMultiplePolicies(query, page = 1) {
   const offset = helper.getOffset(page, config.listPerPage);
-  const rows = await db.query(
-    `SELECT customer_id, policy_type, start_date, end_date, status 
-    FROM policies LIMIT ${offset},${config.listPerPage}`
-  );
-  const data = helper.emptyOrRows(rows);
-  const meta = {page};
 
-  return {
-    data,
-    meta
+  //simplistic if cases to determine if query for all, by customer_id, policy_type
+  if (Object.values(query).length === 0){
+    const rows = await db.query(
+      `SELECT customer_id, policy_type, start_date, end_date, status 
+      FROM policies LIMIT ${offset},${config.listPerPage}`
+    );
+    const data = helper.emptyOrRows(rows);
+    const meta = {page};
+
+    return {
+      data,
+      meta
+    }
   }
+  else if (Object.keys(query) == 'customer_id' || Object.keys(query) == 'policy_type'){
+    const query_name = Object.keys(query)
+    const whereClause = `WHERE ${query_name} IN ('${query[query_name]}')`
+    console.log('whereclause', whereClause)
+    const rows = await db.query(
+      `
+      SELECT policy_id, customer_id, policy_type, start_date, end_date, status
+      FROM policies
+      ${whereClause} LIMIT ${offset},${config.listPerPage}
+      `
+    );
+    const data = helper.emptyOrRows(rows);
+    const meta = {page};
+
+    return {
+      data,
+      meta
+    }
+  }
+}
+/**
+ * GET policy by Policy ID
+ */
+async function getById(policyId) {
+  const rows = await db.query(
+    `
+    SELECT policy_id, customer_id, policy_type, start_date, end_date, status
+    FROM policies
+    WHERE policy_id = ?
+    `,
+    [policyId]
+  );
+
+  return rows.length ? rows[0] : null;
 }
 
 async function create(programmingLanguage){
@@ -67,7 +108,8 @@ async function remove(id){
 
 
 module.exports = {
-  getMultiple,
+  getMultiplePolicies,
+  getById,
   create,
   update,
   remove

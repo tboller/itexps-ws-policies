@@ -18,8 +18,8 @@ app.get("/", (req, res) => {
 
 /* Routers */
 app.use("/policies", policiesRouter);
-app.use("/claims", claimsRouter);
-app.use("/coverages", coveragesRouter);
+// app.use("/claims", claimsRouter);
+// app.use("/coverages", coveragesRouter);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
