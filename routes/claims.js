@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const policies = require('../services/policies');
+const claims = require('../services/claims');
 
 /* GET policies. */
 router.get('/policies', async function(req, res, next) {
