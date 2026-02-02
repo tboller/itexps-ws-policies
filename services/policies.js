@@ -3,7 +3,7 @@ const helper = require('../helper');
 const config = require('../config');
 
 /**
- * GET policies by Customer ID
+ * GET Multiple policies either all, by customer_id or by policy_type
  */
 async function getMultiplePolicies(query, page = 1) {
   const offset = helper.getOffset(page, config.listPerPage);
@@ -42,6 +42,7 @@ async function getMultiplePolicies(query, page = 1) {
     }
   }
 }
+
 /**
  * GET policy by Policy ID
  */
@@ -58,18 +59,20 @@ async function getById(policyId) {
   return rows.length ? rows[0] : null;
 }
 
-async function create(programmingLanguage){
+async function create(policies){
+  //We need to add Request Body Validation
+  let query_ish =     `INSERT INTO policies 
+    (customer_id, policy_type, start_date, end_date, status) VALUES
+    (${policies.customer_id}, '${policies.policy_type}', '${policies.start_date}', '${policies.end_date}', 'PENDING')`
+    console.log(query_ish)
   const result = await db.query(
-    `INSERT INTO programming_languages 
-    (name, released_year, githut_rank, pypl_rank, tiobe_rank) 
-    VALUES 
-    ('${programmingLanguage.name}', ${programmingLanguage.released_year}, ${programmingLanguage.githut_rank}, ${programmingLanguage.pypl_rank}, ${programmingLanguage.tiobe_rank})`
+    query_ish
   );
 
-  let message = 'Error in creating programming language';
+  let message = 'Error in creating new policy';
 
   if (result.affectedRows) {
-    message = 'Programming language created successfully';
+    message = 'Policy created successfully';
   }
 
   return {message};
