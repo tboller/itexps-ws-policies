@@ -1,0 +1,169 @@
+-- create database
+
+
+create database insurance;
+
+
+-- use database
+
+
+use insurance;
+
+
+-- create table policies
+
+
+CREATE TABLE  policies (
+  policy_id     INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id   INT NOT NULL,
+  policy_type   VARCHAR(50) NOT NULL,
+  start_date    DATE NOT NULL,
+  end_date      DATE NOT NULL,
+  status        ENUM('ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING') NOT NULL,
+  CHECK (end_date >= start_date)
+)
+
+engine = innodb charset=utf8mb4 COLLATE utf8mb4_general_ci;
+
+
+-- add records policies
+
+
+INSERT INTO policies (customer_id, policy_type, start_date, end_date, status) VALUES
+(101, 'Collision',   '2023-01-01', '2023-12-31', 'EXPIRED'),
+(102, 'Fire',   '2024-01-15', '2025-01-14', 'ACTIVE'),
+(103, 'Health',   '2022-06-01', '2032-05-31', 'ACTIVE'),
+(104, 'Health', '2023-03-01', '2024-02-29', 'EXPIRED'),
+(105, 'Collision',   '2024-02-01', '2025-01-31', 'ACTIVE'),
+(106, 'Fire',   '2023-07-01', '2024-06-30', 'EXPIRED'),
+(107, 'Health',   '2021-01-01', '2041-12-31', 'ACTIVE'),
+(108, 'Health', '2024-04-01', '2025-03-31', 'ACTIVE'),
+(109, 'Collision',   '2023-09-15', '2024-09-14', 'EXPIRED'),
+(110, 'Fire',   '2024-05-01', '2025-04-30', 'ACTIVE'),
+(111, 'Collision',   '2024-06-01', '2025-05-31', 'ACTIVE'),
+(112, 'Health', '2023-11-01', '2024-10-31', 'EXPIRED'),
+(113, 'Health',   '2020-01-01', '2050-12-31', 'ACTIVE'),
+(114, 'Collision',   '2024-07-15', '2025-07-14', 'PENDING'),
+(115, 'Fire',   '2024-08-01', '2025-07-31', 'PENDING'),
+(116, 'Health', '2022-09-01', '2023-08-31', 'EXPIRED'),
+(117, 'Collision',   '2024-09-01', '2025-08-31', 'ACTIVE'),
+(118, 'Fire',   '2023-10-01', '2024-09-30', 'EXPIRED'),
+(119, 'Health',   '2019-05-01', '2039-04-30', 'ACTIVE'),
+(120, 'Health', '2024-10-01', '2025-09-30', 'PENDING');
+
+
+-- show records 
+
+
+select * from  policies;
+
+
+-- create table coverages
+
+
+CREATE TABLE coverages (
+  coverage_id   INT AUTO_INCREMENT PRIMARY KEY,
+  policy_id     INT NOT NULL,
+  coverage_type VARCHAR(20),
+  limit_amount  DECIMAL(10,2),
+  deductible    DECIMAL(10,2),
+  is_active     BOOLEAN,
+
+  CONSTRAINT fk_coverages_policy
+    FOREIGN KEY (policy_id)
+    REFERENCES policies(policy_id)
+    ON DELETE CASCADE
+)
+
+engine = innodb charset=utf8mb4 COLLATE utf8mb4_general_ci;
+
+
+-- add records for coverages
+
+
+INSERT INTO coverages (policy_id, coverage_type, limit_amount, deductible, is_active) VALUES
+(1, 'Collision', 20000, 500, TRUE),
+(2, 'Health',    50000, 1000, TRUE),
+(3, 'Fire',     100000, 2000, FALSE),
+(4, 'Collision', 25000, 500, TRUE),
+(5, 'Health',    60000, 1200, TRUE),
+(6, 'Collision', 30000, 700, TRUE),
+(7, 'Fire',     120000, 2500, FALSE),
+(8, 'Health',    55000, 1000, TRUE),
+(9, 'Collision', 28000, 600, TRUE),
+(10, 'Fire',     150000, 3000, TRUE),
+(11, 'Collision', 22000, 500, TRUE),
+(12, 'Health',    52000, 900, TRUE),
+(13, 'Fire',     130000, 2500, TRUE),
+(14, 'Collision', 27000, 600, TRUE),
+(15, 'Health',    58000, 1100, FALSE),
+(16, 'Collision', 31000, 700, TRUE),
+(17, 'Fire',     140000, 2800, TRUE),
+(18, 'Health',    62000, 1200, TRUE),
+(19, 'Collision', 29000, 650, TRUE),
+(20, 'Fire',     160000, 3200, TRUE);
+
+
+-- show records 
+
+
+select * from  coverages;
+
+
+-- create table claims
+
+
+CREATE TABLE claims (
+  claim_id     INT AUTO_INCREMENT PRIMARY KEY,
+  policy_id    INT NOT NULL,
+  coverage_id  INT NOT NULL,
+  claim_type   ENUM('Collision', 'Fire', 'Health') NOT NULL,
+  claim_amount DECIMAL(12,2) NOT NULL,
+  claim_date   DATE NOT NULL,
+  status       ENUM('Submitted', 'Approved', 'Rejected') 
+               NOT NULL DEFAULT 'Submitted',
+
+  CONSTRAINT fk_claims_policy
+    FOREIGN KEY (policy_id)
+    REFERENCES policies(policy_id)
+    ON DELETE CASCADE,
+
+  CONSTRAINT fk_claims_coverage
+    FOREIGN KEY (coverage_id)
+    REFERENCES coverages(coverage_id)
+    ON DELETE CASCADE
+)
+
+engine = innodb charset=utf8mb4 COLLATE utf8mb4_general_ci;
+
+
+-- add records for claims
+
+
+INSERT INTO claims (policy_id, coverage_id, claim_type, claim_amount, claim_date, status) VALUES
+(1, 1, 'Collision', 4500.00, '2025-02-10', 'Submitted'),
+(2, 2, 'Health',    1200.00, '2025-03-05', 'Approved'),
+(3, 3, 'Fire',     25000.00, '2025-01-20', 'Rejected'),
+(4, 4, 'Collision', 3800.00, '2025-04-18', 'Approved'),
+(5, 5, 'Health',    2200.00, '2025-05-22', 'Submitted'),
+(6, 6, 'Collision', 5100.00, '2025-06-11', 'Approved'),
+(7, 7, 'Fire',     40000.00, '2025-02-14', 'Rejected'),
+(8, 8, 'Health',    3100.00, '2025-08-01', 'Approved'),
+(9, 9, 'Collision', 4700.00, '2025-09-09', 'Submitted'),
+(10,10, 'Fire',     55000.00, '2025-10-03', 'Approved'),
+(11,11, 'Collision', 4900.00, '2025-03-12', 'Approved'),
+(12,12, 'Health',    1800.00, '2025-04-07', 'Submitted'),
+(13,13, 'Fire',     60000.00, '2025-05-16', 'Approved'),
+(14,14, 'Collision', 5200.00, '2025-06-21', 'Rejected'),
+(15,15, 'Health',    2400.00, '2025-07-19', 'Submitted'),
+(16,16, 'Collision', 6100.00, '2025-08-23', 'Approved'),
+(17,17, 'Fire',     45000.00, '2025-09-14', 'Approved'),
+(18,18, 'Health',    3300.00, '2025-10-10', 'Submitted'),
+(19,19, 'Collision', 5600.00, '2025-11-05', 'Approved'),
+(20,20, 'Fire',     70000.00, '2025-12-01', 'Submitted');
+
+
+-- show records 
+
+
+select * from  claims;
