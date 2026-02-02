@@ -1,0 +1,59 @@
+-- create database
+
+
+create database insurance;
+
+
+-- use database
+
+
+use insurance;
+
+
+-- create table
+
+
+CREATE TABLE `policies`
+(
+  `policy_id`     INT AUTO_INCREMENT PRIMARY KEY ,
+  `customer_id`   INT NOT NULL,
+  `policy_type`   VARCHAR(50) NOT NULL ,
+  `start_date`    DATE NOT NULL,
+  `end_date`      DATE NOT NULL,
+  `status`        ENUM('ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING') NOT NULL,
+   CHECK (end_date >= start_date)
+)
+
+engine = innodb charset=utf8mb4 COLLATE utf8mb4_general_ci;
+
+
+-- add records
+
+
+INSERT INTO policies (customer_id, policy_type, start_date, end_date, status) VALUES
+(101, 'auto',   '2023-01-01', '2023-12-31', 'EXPIRED'),
+(102, 'home',   '2024-01-15', '2025-01-14', 'ACTIVE'),
+(103, 'life',   '2022-06-01', '2032-05-31', 'ACTIVE'),
+(104, 'health', '2023-03-01', '2024-02-29', 'EXPIRED'),
+(105, 'auto',   '2024-02-01', '2025-01-31', 'ACTIVE'),
+(106, 'home',   '2023-07-01', '2024-06-30', 'EXPIRED'),
+(107, 'life',   '2021-01-01', '2041-12-31', 'ACTIVE'),
+(108, 'health', '2024-04-01', '2025-03-31', 'ACTIVE'),
+(109, 'auto',   '2023-09-15', '2024-09-14', 'EXPIRED'),
+(110, 'home',   '2024-05-01', '2025-04-30', 'ACTIVE'),
+(111, 'auto',   '2024-06-01', '2025-05-31', 'ACTIVE'),
+(112, 'health', '2023-11-01', '2024-10-31', 'EXPIRED'),
+(113, 'life',   '2020-01-01', '2050-12-31', 'ACTIVE'),
+(114, 'auto',   '2024-07-15', '2025-07-14', 'PENDING'),
+(115, 'home',   '2024-08-01', '2025-07-31', 'PENDING'),
+(116, 'health', '2022-09-01', '2023-08-31', 'EXPIRED'),
+(117, 'auto',   '2024-09-01', '2025-08-31', 'ACTIVE'),
+(118, 'home',   '2023-10-01', '2024-09-30', 'EXPIRED'),
+(119, 'life',   '2019-05-01', '2039-04-30', 'ACTIVE'),
+(120, 'health', '2024-10-01', '2025-09-30', 'PENDING');
+
+
+-- show records 
+
+
+select * from  policies;
