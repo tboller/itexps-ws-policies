@@ -1,74 +1,73 @@
-const db = require('./db');
-const helper = require('../helper');
-const config = require('../config');
+const db = require("./db");
+const helper = require("../helper");
+const config = require("../config");
 
-async function getMultiple(page = 1){
+async function getMultiple(page = 1) {
   const offset = helper.getOffset(page, config.listPerPage);
   const rows = await db.query(
-    `SELECT id, name, released_year, githut_rank, pypl_rank, tiobe_rank 
-    FROM programming_languages LIMIT ${offset},${config.listPerPage}`
+    `SELECT policy_id, customer_id, policy_type, start_date, end_date, status
+    FROM programming_languages LIMIT ${offset},${config.listPerPage}`,
   );
   const data = helper.emptyOrRows(rows);
-  const meta = {page};
+  const meta = { page };
 
   return {
     data,
-    meta
-  }
+    meta,
+  };
 }
 
-async function create(programmingLanguage){
+async function create(programmingLanguage) {
   const result = await db.query(
     `INSERT INTO programming_languages 
-    (name, released_year, githut_rank, pypl_rank, tiobe_rank) 
+    (policy_id, customer_id, policy_type, start_date, end_date, status) 
     VALUES 
-    ('${programmingLanguage.name}', ${programmingLanguage.released_year}, ${programmingLanguage.githut_rank}, ${programmingLanguage.pypl_rank}, ${programmingLanguage.tiobe_rank})`
+    ('${programmingLanguage.policy_id}', ${programmingLanguage.customer_id}, ${programmingLanguage.policy_type}, ${programmingLanguage.start_date}, ${programmingLanguage.end_date}, ${programmingLanguage.status})`,
   );
 
-  let message = 'Error in creating programming language';
+  let message = "Error in creating claims";
 
   if (result.affectedRows) {
-    message = 'Programming language created successfully';
+    message = "Claims created successfully";
   }
 
-  return {message};
+  return { message };
 }
 
-async function update(id, programmingLanguage){
+async function update(id, programmingLanguage) {
   const result = await db.query(
     `UPDATE programming_languages 
-    SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
-    pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
-    WHERE id=${id}` 
+    SET customer_id=${programmingLanguage.customer_id}, policy_type=${programmingLanguage.policy_type}, 
+    start_date${programmingLanguage.start_date}, end_date=${programmingLanguage.end_date}, status=${programmingLanguage.status} 
+    WHERE policy_id=${policy_id}`,
   );
 
-  let message = 'Error in updating programming language';
+  let message = "Error in updating claims";
 
   if (result.affectedRows) {
-    message = 'Programming language updated successfully';
+    message = "Claims updated successfully";
   }
 
-  return {message};
+  return { message };
 }
 
-async function remove(id){
+async function remove(id) {
   const result = await db.query(
-    `DELETE FROM programming_languages WHERE id=${id}`
+    `DELETE FROM programming_languages WHERE policy_id=${policy_id}`,
   );
 
-  let message = 'Error in deleting programming language';
+  let message = "Error in deleting claims";
 
   if (result.affectedRows) {
-    message = 'Programming language deleted successfully';
+    message = "Claims deleted successfully";
   }
 
-  return {message};
+  return { message };
 }
-
 
 module.exports = {
   getMultiple,
   create,
   update,
-  remove
+  remove,
 };
