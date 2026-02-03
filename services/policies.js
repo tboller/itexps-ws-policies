@@ -69,17 +69,17 @@ async function create(policies) {
     query_ish
   );
 
-  let message = 'Error in creating new policy';
+  let message = {
+    msg: 'Error in creating new policy'
+  };
 
   if (result.affectedRows) {
-    message = `"policy_id": ,
-                "status": "PENDING"`;
+    return {
+      policy_id: result.insertId,
+      status: "PENDING"
+    };
   }
-  console.log("what is affectedRows ", result.affectedRows[1])
-
-  return { message };
 }
-
 async function update(id, programmingLanguage) {
   const result = await db.query(
     `UPDATE programming_languages 
