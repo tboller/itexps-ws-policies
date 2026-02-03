@@ -3,117 +3,131 @@ const helper = require('../helper');
 const config = require('../config');
 
 /**
- * GET Multiple policies either all, by customer_id or by policy_type
+ * GET Multiple policies
  */
 async function getMultiplePolicies(query, page = 1) {
   const offset = helper.getOffset(page, config.listPerPage);
 
-  //simplistic if cases to determine if query for all, by customer_id, policy_type
   if (Object.values(query).length === 0) {
     const rows = await db.query(
       `SELECT customer_id, policy_type, start_date, end_date, status 
-      FROM policies LIMIT ${offset},${config.listPerPage}`
+       FROM policies 
+       LIMIT ${offset},${config.listPerPage}`
     );
-    const data = helper.emptyOrRows(rows);
-    const meta = { page };
 
     return {
-      data,
-      meta
-    }
+      data: helper.emptyOrRows(rows),
+      meta: { page }
+    };
   }
-  else if (Object.keys(query) == 'customer_id' || Object.keys(query) == 'policy_type') {
-    const query_name = Object.keys(query)
-    const whereClause = `WHERE ${query_name} IN ('${query[query_name]}')`
-    console.log('whereclause', whereClause)
+
+  if (
+    Object.keys(query).length === 1 &&
+    (query.customer_id || query.policy_type)
+  ) {
+    const key = Object.keys(query)[0];
+
     const rows = await db.query(
       `
       SELECT policy_id, customer_id, policy_type, start_date, end_date, status
       FROM policies
-      ${whereClause} LIMIT ${offset},${config.listPerPage}
+      WHERE ${key} = '${query[key]}'
+      LIMIT ${offset},${config.listPerPage}
       `
     );
-    const data = helper.emptyOrRows(rows);
-    const meta = { page };
 
     return {
-      data,
-      meta
-    }
+      data: helper.emptyOrRows(rows),
+      meta: { page }
+    };
   }
+
+  throw helper.apiError(
+    400,
+    'Policies can only be queried by customer_id or policy_type'
+  );
 }
 
 /**
- * GET policy by Policy ID
+ * GET policy by ID
  */
 async function getById(policyId) {
   const rows = await db.query(
     `
     SELECT policy_id, customer_id, policy_type, start_date, end_date, status
     FROM policies
-    WHERE policy_id = ?
-    `,
-    [policyId]
+    WHERE policy_id = ${policyId}
+    `
   );
 
-  return rows.length ? rows[0] : null;
+  if (!rows.length) {
+    throw helper.apiError(404, 'Policy not found');
+  }
+
+  return rows[0];
 }
 
-async function create(policies) {
-  //We need to add Request Body Validation
-  let query_ish = `INSERT INTO policies 
+/**
+ * CREATE policy
+ */
+async function create(policy) {
+  const result = await db.query(
+    `INSERT INTO policies 
     (customer_id, policy_type, start_date, end_date, status) VALUES
     (${policies.customer_id}, '${policies.policy_type}', '${policies.start_date}', '${policies.end_date}', 'PENDING')`
-  console.log(query_ish)
-  const result = await db.query(
-    query_ish
   );
 
-  let message = {
-    msg: 'Error in creating new policy'
-  };
-
-  if (result.affectedRows) {
-    return {
-      policy_id: result.insertId,
-      status: "PENDING"
-    };
-  } else {
-    return { message };
+  if (!result.affectedRows) {
+    throw helper.apiError(500, 'Failed to create policy');
   }
+
+  return {
+    policy_id: result.insertId,
+    status: 'PENDING'
+  };
 }
 
+/**
+ * UPDATE policy status
+ */
 async function update(policy_id, policy) {
   const result = await db.query(
-    `UPDATE policies 
-    SET status="${policy.status}"
-    WHERE policy_id=${policy_id}`
+    `
+    UPDATE policies 
+    SET status = ?
+    WHERE policy_id = ?
+    `,
+    [policy.status, policy_id]
   );
 
-  let message = 'Error in updating programming language';
-
-  //changedRows only gives a number if row was changed
-  if (result.changedRows) {
-    return {
-      status: policy.status
-    }
+  if (!result.affectedRows) {
+    throw helper.apiError(404, 'Policy not found');
   }
 
-  return { message };
+  if (!result.changedRows) {
+    throw helper.apiError(
+      409,
+      'Policy already has the specified status'
+    );
+  }
+
+  return {
+    status: policy.status
+  };
 }
 
+/**
+ * DELETE policy
+ */
 async function remove(id) {
   const result = await db.query(
     `DELETE FROM policies WHERE policy_id = ${id}`
   );
 
   if (!result.affectedRows) {
-    const err = new Error('Policy not found');
-    err.statusCode = 404;
-    throw err;
+    throw helper.apiError(404, 'Policy not found');
   }
 }
-
 
 module.exports = {
   getMultiplePolicies,
