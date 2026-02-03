@@ -16,7 +16,7 @@ use insurance;
 CREATE TABLE  policies (
   policy_id     INT AUTO_INCREMENT PRIMARY KEY,
   customer_id   INT NOT NULL,
-  policy_type   VARCHAR(50) NOT NULL,
+  policy_type   ENUM('ACTIVE', 'Home', 'Auto', 'Life', 'Health) NOT NULL,
   start_date    DATE NOT NULL,
   end_date      DATE NOT NULL,
   status        ENUM('ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING') NOT NULL,
@@ -26,30 +26,31 @@ CREATE TABLE  policies (
 engine = innodb charset=utf8mb4 COLLATE utf8mb4_general_ci;
 
 
+
 -- add records policies
 
 
 INSERT INTO policies (customer_id, policy_type, start_date, end_date, status) VALUES
-(101, 'Collision',   '2023-01-01', '2023-12-31', 'EXPIRED'),
-(102, 'Fire',   '2024-01-15', '2025-01-14', 'ACTIVE'),
+(101, 'Home',   '2023-01-01', '2023-12-31', 'EXPIRED'),
+(102, 'Auto',   '2024-01-15', '2025-01-14', 'ACTIVE'),
 (103, 'Health',   '2022-06-01', '2032-05-31', 'ACTIVE'),
 (104, 'Health', '2023-03-01', '2024-02-29', 'EXPIRED'),
-(105, 'Collision',   '2024-02-01', '2025-01-31', 'ACTIVE'),
-(106, 'Fire',   '2023-07-01', '2024-06-30', 'EXPIRED'),
+(105, 'Home',   '2024-02-01', '2025-01-31', 'ACTIVE'),
+(106, 'Auto',   '2023-07-01', '2024-06-30', 'EXPIRED'),
 (107, 'Health',   '2021-01-01', '2041-12-31', 'ACTIVE'),
 (108, 'Health', '2024-04-01', '2025-03-31', 'ACTIVE'),
-(109, 'Collision',   '2023-09-15', '2024-09-14', 'EXPIRED'),
-(110, 'Fire',   '2024-05-01', '2025-04-30', 'ACTIVE'),
-(111, 'Collision',   '2024-06-01', '2025-05-31', 'ACTIVE'),
+(109, 'Life',   '2023-09-15', '2024-09-14', 'EXPIRED'),
+(110, 'Auto',   '2024-05-01', '2025-04-30', 'ACTIVE'),
+(111, 'Home',   '2024-06-01', '2025-05-31', 'ACTIVE'),
 (112, 'Health', '2023-11-01', '2024-10-31', 'EXPIRED'),
-(113, 'Health',   '2020-01-01', '2050-12-31', 'ACTIVE'),
-(114, 'Collision',   '2024-07-15', '2025-07-14', 'PENDING'),
-(115, 'Fire',   '2024-08-01', '2025-07-31', 'PENDING'),
+(113, 'Life',   '2020-01-01', '2050-12-31', 'ACTIVE'),
+(114, 'Home',   '2024-07-15', '2025-07-14', 'PENDING'),
+(115, 'Auto',   '2024-08-01', '2025-07-31', 'PENDING'),
 (116, 'Health', '2022-09-01', '2023-08-31', 'EXPIRED'),
-(117, 'Collision',   '2024-09-01', '2025-08-31', 'ACTIVE'),
-(118, 'Fire',   '2023-10-01', '2024-09-30', 'EXPIRED'),
+(117, 'Home',   '2024-09-01', '2025-08-31', 'ACTIVE'),
+(118, 'Auto',   '2023-10-01', '2024-09-30', 'EXPIRED'),
 (119, 'Health',   '2019-05-01', '2039-04-30', 'ACTIVE'),
-(120, 'Health', '2024-10-01', '2025-09-30', 'PENDING');
+(120, 'Life', '2024-10-01', '2025-09-30', 'PENDING');
 
 
 -- show records 
