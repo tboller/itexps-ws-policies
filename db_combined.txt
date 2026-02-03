@@ -16,7 +16,7 @@ use insurance;
 CREATE TABLE  policies (
   policy_id     INT AUTO_INCREMENT PRIMARY KEY,
   customer_id   INT NOT NULL,
-  policy_type   ENUM('ACTIVE', 'Home', 'Auto', 'Life', 'Health) NOT NULL,
+  policy_type   ENUM('Home', 'Auto', 'Life', 'Health') NOT NULL,
   start_date    DATE NOT NULL,
   end_date      DATE NOT NULL,
   status        ENUM('ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING') NOT NULL,
@@ -65,7 +65,7 @@ select * from  policies;
 CREATE TABLE coverages (
   coverage_id   INT AUTO_INCREMENT PRIMARY KEY,
   policy_id     INT NOT NULL,
-  coverage_type VARCHAR(20),
+  coverage_type ENUM('Collision', 'Health', 'Fire') NOT NULL,
   limit_amount  DECIMAL(10,2),
   deductible    DECIMAL(10,2),
   is_active     BOOLEAN,
