@@ -74,7 +74,7 @@ async function create(policy) {
   const result = await db.query(
     `INSERT INTO policies 
     (customer_id, policy_type, start_date, end_date, status) VALUES
-    (${policies.customer_id}, '${policies.policy_type}', '${policies.start_date}', '${policies.end_date}', 'PENDING')`
+    (${policy.customer_id}, '${policy.policy_type}', '${policy.start_date}', '${policy.end_date}', 'PENDING')`
   );
 
   if (!result.affectedRows) {
