@@ -78,20 +78,25 @@ async function create(policies) {
       policy_id: result.insertId,
       status: "PENDING"
     };
+  } else {
+    return { message };
   }
 }
-async function update(id, programmingLanguage) {
+
+async function update(policy_id, policy) {
   const result = await db.query(
-    `UPDATE programming_languages 
-    SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
-    pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
-    WHERE id=${id}`
+    `UPDATE policies 
+    SET status="${policy.status}"
+    WHERE policy_id=${policy_id}`
   );
 
   let message = 'Error in updating programming language';
 
-  if (result.affectedRows) {
-    message = 'Programming language updated successfully';
+  //changedRows only gives a number if row was changed
+  if (result.changedRows) {
+    return {
+      status: policy.status
+    }
   }
 
   return { message };
@@ -99,16 +104,14 @@ async function update(id, programmingLanguage) {
 
 async function remove(id) {
   const result = await db.query(
-    `DELETE FROM programming_languages WHERE id=${id}`
+    `DELETE FROM policies WHERE policy_id = ${id}`
   );
 
-  let message = 'Error in deleting programming language';
-
-  if (result.affectedRows) {
-    message = 'Programming language deleted successfully';
+  if (!result.affectedRows) {
+    const err = new Error('Policy not found');
+    err.statusCode = 404;
+    throw err;
   }
-
-  return { message };
 }
 
 
