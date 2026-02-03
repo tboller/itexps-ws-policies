@@ -2,13 +2,13 @@ const express = require("express");
 const app = express();
 const port = 3000;
 const policiesRouter = require("./routes/policies");
-// const claimsRouter = require("./routes/claims");
-// const coveragesRouter = require("./routes/coverages");
+const claimsRouter = require("./routes/claims");
+const coveragesRouter = require("./routes/coverages");
 app.use(express.json());
 app.use(
   express.urlencoded({
     extended: true,
-  })
+  }),
 );
 
 //Base route that simply displays messsage of 'ok'
@@ -30,4 +30,4 @@ app.use((err, req, res, next) => {
 });
 app.listen(port, () => {
   console.log(`Policies API listening at http://localhost:${port}`);
-}); 
+});
