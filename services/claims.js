@@ -5,8 +5,8 @@ const config = require("../config");
 async function getMultiple(page = 1) {
   const offset = helper.getOffset(page, config.listPerPage);
   const rows = await db.query(
-    `SELECT policy_id, customer_id, policy_type, start_date, end_date, status
-    FROM programming_languages LIMIT ${offset},${config.listPerPage}`,
+    `SELECT claim_id, policy_id, customer_id, policy_type, start_date, end_date, status
+    FROM claims LIMIT ${offset},${config.listPerPage}`,
   );
   const data = helper.emptyOrRows(rows);
   const meta = { page };
@@ -17,12 +17,12 @@ async function getMultiple(page = 1) {
   };
 }
 
-async function create(programmingLanguage) {
+async function create(claims) {
   const result = await db.query(
-    `INSERT INTO programming_languages 
-    (policy_id, customer_id, policy_type, start_date, end_date, status) 
+    `INSERT INTO claims 
+    (claim_id, policy_id, customer_id, policy_type, start_date, end_date, status) 
     VALUES 
-    ('${programmingLanguage.policy_id}', ${programmingLanguage.customer_id}, ${programmingLanguage.policy_type}, ${programmingLanguage.start_date}, ${programmingLanguage.end_date}, ${programmingLanguage.status})`,
+    ('${claims.claim_id}, ${claims.policy_id}', ${claims.customer_id}, ${claims.policy_type}, ${claims.start_date}, ${claims.end_date}, ${claims.status})`,
   );
 
   let message = "Error in creating claims";
@@ -34,12 +34,12 @@ async function create(programmingLanguage) {
   return { message };
 }
 
-async function update(id, programmingLanguage) {
+async function update(claim_id, claims) {
   const result = await db.query(
-    `UPDATE programming_languages 
-    SET customer_id=${programmingLanguage.customer_id}, policy_type=${programmingLanguage.policy_type}, 
-    start_date${programmingLanguage.start_date}, end_date=${programmingLanguage.end_date}, status=${programmingLanguage.status} 
-    WHERE policy_id=${policy_id}`,
+    `UPDATE claims 
+    SET policy_id=${claims.policy_id}, customer_id=${claims.customer_id}, policy_type=${claims.policy_type}, 
+    start_date${claims.start_date}, end_date=${claims.end_date}, status=${claims.status} 
+    WHERE claim_id=${claim_id}`,
   );
 
   let message = "Error in updating claims";
@@ -51,9 +51,9 @@ async function update(id, programmingLanguage) {
   return { message };
 }
 
-async function remove(id) {
+async function remove(claim_id) {
   const result = await db.query(
-    `DELETE FROM programming_languages WHERE policy_id=${policy_id}`,
+    `DELETE FROM claims WHERE claim_id=${claim_id}`,
   );
 
   let message = "Error in deleting claims";
