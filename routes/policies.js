@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const programmingLanguages = require('../services/policies');
+const policies = require('../services/policies');
 
 /* GET policies. */
 router.get('/', async function(req, res, next) {
@@ -12,7 +12,7 @@ router.get('/', async function(req, res, next) {
   }
 });
 
-/* POST policiess */
+/* POST policies */
 router.post('/', async function(req, res, next) {
   try {
     res.json(await policies.create(req.body));
