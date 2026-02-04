@@ -2,43 +2,43 @@ const express = require('express');
 const router = express.Router();
 const coverages = require('../services/coverages');
 
-/* GET claims. */
+/* GET coverages. */
 router.get('/', async function(req, res, next) {
   try {
-    res.json(await policies.getMultiple(req.query.page));
+    res.json(await coverages.getMultiple(req.query.page));
   } catch (err) {
-    console.error(`Error while getting claims`, err.message);
+    console.error(`Error while getting coverages`, err.message);
     next(err);
   }
 });
 
-/* POST claims */
+/* POST coverages */
 router.post('/', async function(req, res, next) {
   try {
-    res.json(await policies.create(req.body));
+    res.json(await coverages.create(req.body));
   } catch (err) {
-    console.error(`Error while creating claims`, err.message);
+    console.error(`Error while creating coverages`, err.message);
     next(err);
   }
 });
 
 
-/* PUT claims */
+/* PUT coverages */
 router.put('/:id', async function(req, res, next) {
   try {
-    res.json(await policies.update(req.params.id, req.body));
+    res.json(await coverages.update(req.params.id, req.body));
   } catch (err) {
-    console.error(`Error while updating claims`, err.message);
+    console.error(`Error while updating coverages`, err.message);
     next(err);
   }
 });
 
-/* DELETE claims */
+/* DELETE coverages */
 router.delete('/:id', async function(req, res, next) {
   try {
-    res.json(await policies.remove(req.params.id));
+    res.json(await coverages.remove(req.params.id));
   } catch (err) {
-    console.error(`Error while deleting claims`, err.message);
+    console.error(`Error while deleting coverages`, err.message);
     next(err);
   }
 });

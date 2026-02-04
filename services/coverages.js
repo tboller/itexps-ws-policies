@@ -5,8 +5,8 @@ const config = require('../config');
 async function getMultiple(page = 1){
   const offset = helper.getOffset(page, config.listPerPage);
   const rows = await db.query(
-    `SELECT id, name, released_year, githut_rank, pypl_rank, tiobe_rank 
-    FROM programming_languages LIMIT ${offset},${config.listPerPage}`
+    `SELECT coverage_id, policy_id, coverage_type, deductible, is_active
+    FROM coverages LIMIT ${offset},${config.listPerPage}`
   );
   const data = helper.emptyOrRows(rows);
   const meta = {page};
@@ -17,35 +17,34 @@ async function getMultiple(page = 1){
   }
 }
 
-async function create(programmingLanguage){
+async function create(coverage){
   const result = await db.query(
-    `INSERT INTO programming_languages 
-    (name, released_year, githut_rank, pypl_rank, tiobe_rank) 
+    `INSERT INTO coverages 
+    (SELECT coverage_id, policy_id, coverage_type, deductible, is_active) 
     VALUES 
-    ('${programmingLanguage.name}', ${programmingLanguage.released_year}, ${programmingLanguage.githut_rank}, ${programmingLanguage.pypl_rank}, ${programmingLanguage.tiobe_rank})`
+    ('${coverage.coverage_id}', ${coverage.policy_id}, ${coverage.coverage_type}, ${coverage.deductible}, ${coverage.is_active})`
   );
 
-  let message = 'Error in creating programming language';
+  let message = 'Error in creating coverage';
 
   if (result.affectedRows) {
-    message = 'Programming language created successfully';
+    message = 'Coverage created successfully';
   }
 
   return {message};
 }
 
-async function update(id, programmingLanguage){
+async function update(coverage_id, coverage){
   const result = await db.query(
     `UPDATE programming_languages 
-    SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
-    pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
-    WHERE id=${id}` 
+    SET policy_id="${coverage.policy_id}", coverage_type="${coverage.coverage_type}", deductible=${coverage.deductible}, is_active=${coverage.is_active}
+    WHERE coverage_id=${coverage_id}` 
   );
 
-  let message = 'Error in updating programming language';
+  let message = 'Error in updating coverage';
 
   if (result.affectedRows) {
-    message = 'Programming language updated successfully';
+    message = 'Coverage updated successfully';
   }
 
   return {message};
@@ -53,13 +52,13 @@ async function update(id, programmingLanguage){
 
 async function remove(id){
   const result = await db.query(
-    `DELETE FROM programming_languages WHERE id=${id}`
+    `DELETE FROM coverages WHERE coverage_id=${coverage_id}`
   );
 
-  let message = 'Error in deleting programming language';
+  let message = 'Error in deleting coverage';
 
   if (result.affectedRows) {
-    message = 'Programming language deleted successfully';
+    message = 'Coverage deleted successfully';
   }
 
   return {message};
