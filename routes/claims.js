@@ -1,43 +1,71 @@
 const express = require("express");
 const router = express.Router();
+const helper = require("../helper");
 const claims = require("../services/claims");
+const validation = require("../validation/claims");
 
 /* GET claims */
-router.get("/", async function (req, res, next) {
+router.get("/", async (req, res, next) => {
   try {
-    res.json(await claims.getMultiple(req.query.page));
+    const error = validation.validateQuery(req.query);
+    if (error) {
+      throw helper.apiError(400, error, req);
+    }
+
+    res.json(await claims.getMultipleClaims(req.query, req.query.page));
   } catch (err) {
-    console.error(`Error while getting claims`, err.message);
+    next(err);
+  }
+});
+
+/* GET claims by ID */
+router.get("/:id", async (req, res, next) => {
+  try {
+    const claim = await claim.getById(req.params.id);
+    if (!claim) {
+      throw helper.apiError(404, "Claim not found", req);
+    }
+    res.json(claim);
+  } catch (err) {
     next(err);
   }
 });
 
 /* POST claims */
-router.post("/", async function (req, res, next) {
+router.post("/", async (req, res, next) => {
   try {
-    res.json(await claims.create(req.body));
+    const error = validation.validateCreateClaim(req.body);
+    if (error) {
+      throw helper.apiError(400, error, req);
+    }
+
+    const result = await claims.create(req.body);
+    res.status(201).json(result);
   } catch (err) {
-    console.error(`Error while creating claims`, err.message);
     next(err);
   }
 });
 
 /* PUT claims */
-router.put("/:id", async function (req, res, next) {
+router.put("/:id", async (req, res, next) => {
   try {
+    const error = validation.validateUpdateClaim(req.body);
+    if (error) {
+      throw helper.apiError(400, error, req);
+    }
+
     res.json(await claims.update(req.params.id, req.body));
   } catch (err) {
-    console.error(`Error while updating claims`, err.message);
     next(err);
   }
 });
 
 /* DELETE claims */
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", async (req, res, next) => {
   try {
-    res.json(await claims.remove(req.params.id));
+    await claims.remove(req.params.id);
+    res.status(204).send();
   } catch (err) {
-    console.error(`Error while deleting claims`, err.message);
     next(err);
   }
 });
