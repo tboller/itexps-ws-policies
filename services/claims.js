@@ -2,71 +2,128 @@ const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
 
-async function getMultiple(page = 1) {
+/**
+ * GET Multiple claims
+ */
+
+async function getMultipleClaims(query, page = 1) {
   const offset = helper.getOffset(page, config.listPerPage);
-  const rows = await db.query(
-    `SELECT claim_id, policy_id, customer_id, policy_type, start_date, end_date, status
-    FROM claims LIMIT ${offset},${config.listPerPage}`,
+
+  if (Object.values(query).length === 0) {
+    const rows = await db.query(
+      `SELECT claim_id, policy_id, coverage_id, claim_type, claim_amount, claim_date, status 
+       FROM claims
+       LIMIT ${offset},${config.listPerPage}`,
+    );
+
+    return {
+      data: helper.emptyOrRows(rows),
+      meta: { page },
+    };
+  }
+
+  if (Object.keys(query).length === 1 && (query.claim_id || query.policy_id)) {
+    const key = Object.keys(query)[0];
+
+    const rows = await db.query(
+      `
+      SELECT claim_id, policy_id, coverage_id, claim_type, claim_amount, claim_date, status
+      FROM claims
+      WHERE ${key} = '${query[key]}'
+      LIMIT ${offset},${config.listPerPage}
+      `,
+    );
+
+    return {
+      data: helper.emptyOrRows(rows),
+      meta: { page },
+    };
+  }
+  throw helper.apiError(
+    400,
+    "Claims can only be queried by claim_id or policy_id",
   );
-  const data = helper.emptyOrRows(rows);
-  const meta = { page };
+}
+
+/**
+ * GET claim by ID
+ */
+async function getById(claimId) {
+  const rows = await db.query(
+    `
+    SELECT claim_id, policy_id, coverage_id, claim_type, claim_amount, claim_date, status
+    FROM claims
+    WHERE claim_id = ${claimId}
+    `,
+  );
+
+  if (!rows.length) {
+    throw helper.apiError(404, "Claim not found");
+  }
+
+  return rows[0];
+}
+
+/**
+ * CREATE claim
+ */
+async function create(claim) {
+  const result = await db.query(
+    `INSERT INTO claims 
+    (policy_id, coverage_id, claim_type, claim_amount, claim_date, status) VALUES
+    (${claim.policy_id}, '${claim.coverage_id}', '${claim.claim_type}', '${claim.claim_amount}', '${claim.claim_date}', 'PENDING')`,
+  );
+
+  if (!result.affectedRows) {
+    throw helper.apiError(500, "Failed to create claim");
+  }
 
   return {
-    data,
-    meta,
+    policy_id: result.insertId,
+    status: "PENDING",
   };
 }
 
-async function create(claims) {
+/**
+ * UPDATE claim status
+ */
+async function update(claim_id, claim) {
   const result = await db.query(
-    `INSERT INTO claims 
-    (claim_id, policy_id, customer_id, policy_type, start_date, end_date, status) 
-    VALUES 
-    ('${claims.claim_id}, ${claims.policy_id}', ${claims.customer_id}, ${claims.policy_type}, ${claims.start_date}, ${claims.end_date}, ${claims.status})`,
+    `
+    UPDATE claims
+    SET status = ?
+    WHERE claim_id = ?
+    `,
+    [claim.status, claim_id],
   );
 
-  let message = "Error in creating claims";
-
-  if (result.affectedRows) {
-    message = "Claims created successfully";
+  if (!result.affectedRows) {
+    throw helper.apiError(404, "Claim not found");
   }
 
-  return { message };
+  if (!result.changedRows) {
+    throw helper.apiError(409, "Claim already has the specified status");
+  }
+
+  return {
+    status: policy.status,
+  };
 }
 
-async function update(claim_id, claims) {
-  const result = await db.query(
-    `UPDATE claims 
-    SET policy_id=${claims.policy_id}, customer_id=${claims.customer_id}, policy_type=${claims.policy_type}, 
-    start_date${claims.start_date}, end_date=${claims.end_date}, status=${claims.status} 
-    WHERE claim_id=${claim_id}`,
-  );
+/**
+ * DELETE claim
+ */
+async function remove(id) {
+  const result = await db.query(`DELETE FROM claims WHERE claim_id = ${id}`);
 
-  let message = "Error in updating claims";
-
-  if (result.affectedRows) {
-    message = "Claims updated successfully";
+  if (!result.affectedRows) {
+    throw helper.apiError(404, "Claim not found");
   }
-
-  return { message };
-}
-
-async function remove(claim_id) {
-  const result = await db.query(
-    `DELETE FROM claims WHERE claim_id=${claim_id}`,
-  );
-
-  let message = "Error in deleting claims";
-
-  if (result.affectedRows) {
-    message = "Claims deleted successfully";
-  }
-
-  return { message };
 }
 
 module.exports = {
-  getMultiple,
+  getMultipleClaims,
+  getById,
   create,
   update,
   remove,
