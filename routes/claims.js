@@ -21,7 +21,7 @@ router.get("/", async (req, res, next) => {
 /* GET claims by ID */
 router.get("/:id", async (req, res, next) => {
   try {
-    const claim = await claim.getById(req.params.id);
+    const claim = await claims.getById(req.params.id);
     if (!claim) {
       throw helper.apiError(404, "Claim not found", req);
     }

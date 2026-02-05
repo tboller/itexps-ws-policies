@@ -52,7 +52,7 @@ function validateQuery(query) {
   return null;
 }
 
-export default {
+module.exports = {
   validateCreateClaim,
   validateUpdateClaim,
   validateQuery,
