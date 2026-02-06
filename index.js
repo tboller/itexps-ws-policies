@@ -3,7 +3,7 @@ const app = express();
 const port = 3000;
 const policiesRouter = require("./routes/policies");
 const claimsRouter = require("./routes/claims");
-// const coveragesRouter = require("./routes/coverages");
+const coveragesRouter = require("./routes/coverages");
 app.use(express.json());
 app.use(
   express.urlencoded({
@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 /* Routers */
 app.use("/policies", policiesRouter);
 app.use("/claims", claimsRouter);
-// app.use("/coverages", coveragesRouter);
+app.use("/coverages", coveragesRouter);
 
 /* Error handler middleware */
 // app.use((err, req, res, next) => {
@@ -45,5 +45,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Policies API listening at http://localhost:${port}`);
+  console.log(`Insurance API listening at http://localhost:${port}`);
 });
