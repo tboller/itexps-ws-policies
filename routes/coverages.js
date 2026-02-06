@@ -24,9 +24,9 @@ router.post('/', async function(req, res, next) {
 
 
 /* PUT coverages */
-router.put('/:id', async function(req, res, next) {
+router.put('/:coverage_id', async function(req, res, next) {
   try {
-    res.json(await coverages.update(req.params.id, req.body));
+    res.json(await coverages.update(req.params.coverage_id, req.body));
   } catch (err) {
     console.error(`Error while updating coverages`, err.message);
     next(err);
@@ -34,9 +34,9 @@ router.put('/:id', async function(req, res, next) {
 });
 
 /* DELETE coverages */
-router.delete('/:id', async function(req, res, next) {
+router.delete('/:coverage_id', async function(req, res, next) {
   try {
-    res.json(await coverages.remove(req.params.id));
+    res.json(await coverages.remove(req.params.coverage_id));
   } catch (err) {
     console.error(`Error while deleting coverages`, err.message);
     next(err);

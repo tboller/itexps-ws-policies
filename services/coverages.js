@@ -50,7 +50,7 @@ async function update(coverage_id, coverage){
   return {message};
 }
 
-async function remove(id){
+async function remove(coverage_id){
   const result = await db.query(
     `DELETE FROM coverages WHERE coverage_id=${coverage_id}`
   );
