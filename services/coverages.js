@@ -2,64 +2,111 @@ const db = require('./db');
 const helper = require('../helper');
 const config = require('../config');
 
-async function getMultiple(page = 1){
+/**
+ * GET Multiple coverages
+ */
+async function getMultipleCoverages(page = 1){
   const offset = helper.getOffset(page, config.listPerPage);
+  
+  if (Object.values(query).length === 0) {
+    const rows = await db.query(
+      `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active
+      FROM coverages
+      LIMIT ${offset},${config.listPerPage}`,
+    );
+
+    return {
+      data: helper.emptyOrRows(rows),
+      meta: { page },
+    };
+  } 
+
+  if (
+    Object.keys(query).length === 1 &&
+    (query.coverage_type || query.policy_id)
+  ) {
+    const key = Object.keys(query)[0];
+
+    const rows = await db.query(
+      `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active 
+      FROM coverages
+      WHERE ${key} = '${query[key]}'
+      LIMIT ${offset},${config.listPerPage}
+      `,
+    );
+
+    return {
+      data: helper.emptyOrRows(rows),
+      meta: { page },
+    };
+  }
+  throw helper.apiError(
+    400,
+    "Coverages can only be queried by coverage_id or policy_id",
+  );
+}
+
+/**
+ * GET claim by ID
+ */
+async function getById(coverageId) {
   const rows = await db.query(
-    `SELECT id, name, released_year, githut_rank, pypl_rank, tiobe_rank 
-    FROM programming_languages LIMIT ${offset},${config.listPerPage}`
+    `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active 
+    FROM coverages
+    WHERE coverage_id = ${coverageId}
+    `,
   );
-  const data = helper.emptyOrRows(rows);
-  const meta = {page};
 
-  return {
-    data,
-    meta
+  if (!rows.length) {
+    throw helper.apiError(404, "Coverage not found");
   }
+
+  return rows[0];
 }
 
-async function create(programmingLanguage){
+async function create(coverage){
   const result = await db.query(
-    `INSERT INTO programming_languages 
-    (name, released_year, githut_rank, pypl_rank, tiobe_rank) 
+    `INSERT INTO coverages 
+    (policy_id, coverage_type, limit_amount, deductible, is_active) 
     VALUES 
-    ('${programmingLanguage.name}', ${programmingLanguage.released_year}, ${programmingLanguage.githut_rank}, ${programmingLanguage.pypl_rank}, ${programmingLanguage.tiobe_rank})`
+    ('${coverage.policy_id}', ${coverage.coverage_type}, ${coverage.limit_amount}, ${coverage.deductible}, ${coverage.is_active})`
   );
 
-  let message = 'Error in creating programming language';
+  let message = 'Error in creating coverage';
 
   if (result.affectedRows) {
-    message = 'Programming language created successfully';
+    message = 'Coverage created successfully';
   }
 
   return {message};
 }
 
-async function update(id, programmingLanguage){
+async function update(coverageid, coverage){
   const result = await db.query(
-    `UPDATE programming_languages 
-    SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
-    pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
-    WHERE id=${id}` 
+    `UPDATE coverages 
+    SET policy_id="${coverage.policy_id}", coverage_type=${coverage.coverage_type}, limit_amount=${coverage.limit_amount}, 
+    deductible=${coverage.deductible}, is_active=${coverage.is_active} 
+    WHERE coverage_id=${coverageid}` 
   );
 
-  let message = 'Error in updating programming language';
+  let message = 'Error in updating coverage';
 
   if (result.affectedRows) {
-    message = 'Programming language updated successfully';
+    message = 'Coverage updated successfully';
   }
 
   return {message};
 }
 
-async function remove(id){
+async function remove(coverageid){
   const result = await db.query(
-    `DELETE FROM programming_languages WHERE id=${id}`
+    `DELETE FROM coverages WHERE coverage_id=${coverageid}`
   );
 
-  let message = 'Error in deleting programming language';
+  let message = 'Error in deleting coverage';
 
   if (result.affectedRows) {
-    message = 'Programming language deleted successfully';
+    message = 'Coverage deleted successfully';
   }
 
   return {message};
@@ -67,7 +114,8 @@ async function remove(id){
 
 
 module.exports = {
-  getMultiple,
+  getMultipleCoverages,
+  getById,
   create,
   update,
   remove
