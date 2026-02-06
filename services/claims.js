@@ -22,7 +22,10 @@ async function getMultipleClaims(query, page = 1) {
     };
   }
 
-  if (Object.keys(query).length === 1 && (query.claim_id || query.policy_id)) {
+  if (
+    Object.keys(query).length === 1 &&
+    (query.claim_type || query.policy_id)
+  ) {
     const key = Object.keys(query)[0];
 
     const rows = await db.query(

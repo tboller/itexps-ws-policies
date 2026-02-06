@@ -36,6 +36,7 @@ function validateUpdateClaim(body) {
 }
 
 function validateQuery(query) {
+  console.log(`query value is ${Object.keys(query)}`);
   const allowed = ["policy_id", "claim_type", "page"];
   const keys = Object.keys(query);
 
