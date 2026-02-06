@@ -82,7 +82,7 @@ async function create(claim) {
   }
 
   return {
-    policy_id: result.insertId,
+    claim_id: result.insertId,
     status: "Submitted",
   };
 }
@@ -109,7 +109,7 @@ async function update(claim_id, claim) {
   }
 
   return {
-    status: policy.status,
+    status: claim.status,
   };
 }
 
