@@ -74,7 +74,7 @@ async function create(claim) {
   const result = await db.query(
     `INSERT INTO claims 
     (policy_id, coverage_id, claim_type, claim_amount, claim_date, status) VALUES
-    (${claim.policy_id}, '${claim.coverage_id}', '${claim.claim_type}', '${claim.claim_amount}', '${claim.claim_date}', 'PENDING')`,
+    (${claim.policy_id}, ${claim.coverage_id}, '${claim.claim_type}', ${claim.claim_amount}, '${claim.claim_date}', 'Submitted')`,
   );
 
   if (!result.affectedRows) {
@@ -83,7 +83,7 @@ async function create(claim) {
 
   return {
     policy_id: result.insertId,
-    status: "PENDING",
+    status: "Submitted",
   };
 }
 
