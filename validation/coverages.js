@@ -1,27 +1,19 @@
-const VALID_POLICY_TYPES = ['Home', 'Auto', 'Life', 'Health'];
-const VALID_STATUSES = ['ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING'];
+const VALID_COVERAGE_TYPES = ['Fire', 'Collision', 'Health'];
+const VALID_STATUSES = ['TRUE', 'FALSE'];
 
-function validateCreatePolicy(body) {
-    if (!body.customer_id || !Number.isInteger(body.customer_id)) {
-        return 'customer_id must be an integer';
+function validateCreateCoverage(body) {
+    if (!body.policy_id || !Number.isInteger(body.policy_id)) {
+        return 'policy_id must be an integer';
     }
 
-    if (!VALID_POLICY_TYPES.includes(body.policy_type)) {
-        return 'Invalid policy_type value';
-    }
-
-    if (!body.start_date || !body.end_date) {
-        return 'start_date and end_date are required';
-    }
-
-    if (new Date(body.end_date) < new Date(body.start_date)) {
-        return 'end_date must be greater than or equal to start_date';
+    if (!VALID_COVERAGE_TYPES.includes(body.coverage_type)) {
+        return 'Invalid coverage_type value';
     }
 
     return null;
 }
 
-function validateUpdatePolicy(body) {
+function validateUpdateCoverage(body) {
     if (!body.status || !VALID_STATUSES.includes(body.status)) {
         return 'Invalid status value';
     }
@@ -29,24 +21,25 @@ function validateUpdatePolicy(body) {
 }
 
 function validateQuery(query) {
-    const allowed = ['customer_id', 'policy_type', 'page'];
+    console.log(`query value is ${Object.keys(query)}`);
+    const allowed = ['policy_id', 'coverage_type', 'page'];
     const keys = Object.keys(query);
 
     for (const key of keys) {
         if (!allowed.includes(key)) {
-            return 'Policies can only be queried by customer_id or policy_type';
+            return 'Coverages can only be queried by policy_id or coverage_type';
         }
     }
 
-    if (query.policy_type && !VALID_POLICY_TYPES.includes(query.policy_type)) {
-        return 'Invalid policy_type value';
+    if (query.coverage_type && !VALID_COVERAGE_TYPES.includes(query.coverage_type)) {
+        return 'Invalid coverage_type value';
     }
 
     return null;
 }
 
 module.exports = {
-    validateCreatePolicy,
-    validateUpdatePolicy,
+    validateCreateCoverage,
+    validateUpdateCoverage,
     validateQuery
 };
