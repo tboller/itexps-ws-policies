@@ -47,7 +47,7 @@ async function getMultipleCoverages(query, page = 1){
 }
 
 /**
- * GET claim by ID
+ * GET Coverage by ID
  */
 async function getById(coverageId) {
   const rows = await db.query(
@@ -64,6 +64,9 @@ async function getById(coverageId) {
   return rows[0];
 }
 
+/**
+ * Create Coverage
+ */
 async function create(coverage){
   const initial_active_bool = true;
   const result = await db.query(
@@ -84,6 +87,10 @@ async function create(coverage){
   };
 }
 
+
+/**
+ * Update Coverage limit or deductible by id
+ */
 async function update(coverageid, coverage){
   const result = await db.query(
     `UPDATE coverages 
@@ -109,6 +116,9 @@ async function update(coverageid, coverage){
   };
 }
 
+/**
+ * Delete Coverage by ID
+ */
 async function remove(coverageid){
   const result = await db.query(
     `DELETE FROM coverages WHERE coverage_id=${coverageid}`
