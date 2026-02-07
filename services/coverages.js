@@ -114,13 +114,9 @@ async function remove(coverageid){
     `DELETE FROM coverages WHERE coverage_id=${coverageid}`
   );
 
-  let message = 'Error in deleting coverage';
-
-  if (result.affectedRows) {
-    message = 'Coverage deleted successfully';
+  if (!result.affectedRows) {
+    throw helper.apiError(404, 'Coverage not found');
   }
-
-  return {message};
 }
 
 
