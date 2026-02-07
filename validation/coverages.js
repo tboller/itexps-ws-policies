@@ -14,9 +14,38 @@ function validateCreateCoverage(body) {
 }
 
 function validateUpdateCoverage(body) {
-    if (!body.status || !VALID_STATUSES.includes(body.status)) {
-        return 'Invalid status value';
+    if (!body || Object.keys(body).length === 0) {
+        return 'Request body is required';
     }
+
+    // Only allow specific fields
+    const allowedFields = ['limit_amount', 'deductible'];
+    const bodyFields = Object.keys(body);
+
+    for (const field of bodyFields) {
+        if (!allowedFields.includes(field)) {
+            return `Invalid field: ${field}`;
+        }
+    }
+
+    // Validate limit_amount
+    if (
+        body.limit_amount === undefined ||
+        typeof body.limit_amount !== 'number' ||
+        body.limit_amount <= 0
+    ) {
+        return 'limit_amount must be a positive number';
+    }
+
+    // Validate deductible
+    if (
+        body.deductible === undefined ||
+        typeof body.deductible !== 'number' ||
+        body.deductible < 0
+    ) {
+        return 'deductible must be a non-negative number';
+    }
+
     return null;
 }
 
