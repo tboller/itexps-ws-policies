@@ -5,7 +5,7 @@ const config = require('../config');
 /**
  * GET Multiple coverages
  */
-async function getMultipleCoverages(page = 1){
+async function getMultipleCoverages(query, page = 1){
   const offset = helper.getOffset(page, config.listPerPage);
   
   if (Object.values(query).length === 0) {
