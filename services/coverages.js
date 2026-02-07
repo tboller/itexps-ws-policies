@@ -87,18 +87,26 @@ async function create(coverage){
 async function update(coverageid, coverage){
   const result = await db.query(
     `UPDATE coverages 
-    SET policy_id="${coverage.policy_id}", coverage_type=${coverage.coverage_type}, limit_amount=${coverage.limit_amount}, 
-    deductible=${coverage.deductible}, is_active=${coverage.is_active} 
+    SET limit_amount=${coverage.limit_amount}, deductible=${coverage.deductible}
     WHERE coverage_id=${coverageid}` 
   );
 
-  let message = 'Error in updating coverage';
-
-  if (result.affectedRows) {
-    message = 'Coverage updated successfully';
+  if (!result.affectedRows) {
+    throw helper.apiError(404, 'Coverage not found');
   }
 
-  return {message};
+  if (!result.changedRows) {
+    throw helper.apiError(
+      409,
+      'Coverage already matches given Limit and Deductible.'
+    );
+  }
+
+  return {
+    coverage: coverageid,
+    limit_amount: coverage.limit_amount,
+    deductible: coverage.deductible
+  };
 }
 
 async function remove(coverageid){
