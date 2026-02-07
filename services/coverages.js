@@ -65,20 +65,23 @@ async function getById(coverageId) {
 }
 
 async function create(coverage){
+  const initial_active_bool = true;
   const result = await db.query(
     `INSERT INTO coverages 
     (policy_id, coverage_type, limit_amount, deductible, is_active) 
     VALUES 
-    ('${coverage.policy_id}', ${coverage.coverage_type}, ${coverage.limit_amount}, ${coverage.deductible}, ${coverage.is_active})`
+    ('${coverage.policy_id}', '${coverage.coverage_type}', ${coverage.limit_amount}, ${coverage.deductible}, ${initial_active_bool})`
   );
 
-  let message = 'Error in creating coverage';
 
-  if (result.affectedRows) {
-    message = 'Coverage created successfully';
+  if (!result.affectedRows) {
+    throw helper.apiError(500, 'Failed to create coverage');
   }
-
-  return {message};
+  
+  return {
+    coverage_id: result.insertId,
+    is_active: 'true'
+  };
 }
 
 async function update(coverageid, coverage){
