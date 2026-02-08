@@ -45,5 +45,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-  console.log(`Policies API listening at http://localhost:${port}`);
+  console.log(`Insurance API listening at http://localhost:${port}`);
 });
