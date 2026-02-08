@@ -2,72 +2,137 @@ const db = require('./db');
 const helper = require('../helper');
 const config = require('../config');
 
-async function getMultiple(page = 1){
+/**
+ * GET Multiple coverages
+ */
+async function getMultipleCoverages(query, page = 1){
   const offset = helper.getOffset(page, config.listPerPage);
-  const rows = await db.query(
-    `SELECT id, name, released_year, githut_rank, pypl_rank, tiobe_rank 
-    FROM programming_languages LIMIT ${offset},${config.listPerPage}`
+  
+  if (Object.values(query).length === 0) {
+    const rows = await db.query(
+      `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active
+      FROM coverages
+      LIMIT ${offset},${config.listPerPage}`,
+    );
+
+    return {
+      data: helper.emptyOrRows(rows),
+      meta: { page },
+    };
+  } 
+
+  if (
+    Object.keys(query).length === 1 &&
+    (query.coverage_type || query.policy_id)
+  ) {
+    const key = Object.keys(query)[0];
+
+    const rows = await db.query(
+      `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active 
+      FROM coverages
+      WHERE ${key} = '${query[key]}'
+      LIMIT ${offset},${config.listPerPage}
+      `,
+    );
+
+    return {
+      data: helper.emptyOrRows(rows),
+      meta: { page },
+    };
+  }
+  throw helper.apiError(
+    400,
+    "Coverages can only be queried by coverage_id or policy_id",
   );
-  const data = helper.emptyOrRows(rows);
-  const meta = {page};
+}
+
+/**
+ * GET Coverage by ID
+ */
+async function getById(coverageId) {
+  const rows = await db.query(
+    `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active 
+    FROM coverages
+    WHERE coverage_id = ${coverageId}
+    `,
+  );
+
+  if (!rows.length) {
+    throw helper.apiError(404, "Coverage not found");
+  }
+
+  return rows[0];
+}
+
+/**
+ * Create Coverage
+ */
+async function create(coverage){
+  const initial_active_bool = true;
+  const result = await db.query(
+    `INSERT INTO coverages 
+    (policy_id, coverage_type, limit_amount, deductible, is_active) 
+    VALUES 
+    ('${coverage.policy_id}', '${coverage.coverage_type}', ${coverage.limit_amount}, ${coverage.deductible}, ${initial_active_bool})`
+  );
+
+
+  if (!result.affectedRows) {
+    throw helper.apiError(500, 'Failed to create coverage');
+  }
+  
+  return {
+    coverage_id: result.insertId,
+    is_active: 'true'
+  };
+}
+
+
+/**
+ * Update Coverage limit or deductible by id
+ */
+async function update(coverageid, coverage){
+  const result = await db.query(
+    `UPDATE coverages 
+    SET limit_amount=${coverage.limit_amount}, deductible=${coverage.deductible}
+    WHERE coverage_id=${coverageid}` 
+  );
+
+  if (!result.affectedRows) {
+    throw helper.apiError(404, 'Coverage not found');
+  }
+
+  if (!result.changedRows) {
+    throw helper.apiError(
+      409,
+      'Coverage already matches given Limit and Deductible.'
+    );
+  }
 
   return {
-    data,
-    meta
-  }
+    coverage: coverageid,
+    limit_amount: coverage.limit_amount,
+    deductible: coverage.deductible
+  };
 }
 
-async function create(programmingLanguage){
+/**
+ * Delete Coverage by ID
+ */
+async function remove(coverageid){
   const result = await db.query(
-    `INSERT INTO programming_languages 
-    (name, released_year, githut_rank, pypl_rank, tiobe_rank) 
-    VALUES 
-    ('${programmingLanguage.name}', ${programmingLanguage.released_year}, ${programmingLanguage.githut_rank}, ${programmingLanguage.pypl_rank}, ${programmingLanguage.tiobe_rank})`
+    `DELETE FROM coverages WHERE coverage_id=${coverageid}`
   );
 
-  let message = 'Error in creating programming language';
-
-  if (result.affectedRows) {
-    message = 'Programming language created successfully';
+  if (!result.affectedRows) {
+    throw helper.apiError(404, 'Coverage not found');
   }
-
-  return {message};
-}
-
-async function update(id, programmingLanguage){
-  const result = await db.query(
-    `UPDATE programming_languages 
-    SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
-    pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
-    WHERE id=${id}` 
-  );
-
-  let message = 'Error in updating programming language';
-
-  if (result.affectedRows) {
-    message = 'Programming language updated successfully';
-  }
-
-  return {message};
-}
-
-async function remove(id){
-  const result = await db.query(
-    `DELETE FROM programming_languages WHERE id=${id}`
-  );
-
-  let message = 'Error in deleting programming language';
-
-  if (result.affectedRows) {
-    message = 'Programming language deleted successfully';
-  }
-
-  return {message};
 }
 
 
 module.exports = {
-  getMultiple,
+  getMultipleCoverages,
+  getById,
   create,
   update,
   remove

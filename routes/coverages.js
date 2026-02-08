@@ -1,47 +1,73 @@
 const express = require('express');
 const router = express.Router();
+const helper = require('../helper');
 const coverages = require('../services/coverages');
+const validation = require('../validation/coverages');
 
-/* GET claims. */
-router.get('/', async function(req, res, next) {
+/* GET coverages */
+router.get('/', async (req, res, next) => {
   try {
-    res.json(await policies.getMultiple(req.query.page));
+    const error = validation.validateQuery(req.query);
+    if (error) {
+      throw helper.apiError(400, error, req);
+    }
+
+    res.json(await coverages.getMultipleCoverages(req.query, req.query.page));
   } catch (err) {
-    console.error(`Error while getting claims`, err.message);
     next(err);
   }
 });
 
-/* POST claims */
-router.post('/', async function(req, res, next) {
+/* GET Coverage by ID */
+router.get('/:id', async (req, res, next) => {
   try {
-    res.json(await policies.create(req.body));
+    const coverage = await coverages.getById(req.params.id);
+    if (!coverage) {
+      throw helper.apiError(404, 'Coverage not found', req);
+    }
+    res.json(coverage);
   } catch (err) {
-    console.error(`Error while creating claims`, err.message);
     next(err);
   }
 });
 
-
-/* PUT claims */
-router.put('/:id', async function(req, res, next) {
+/* POST coverages */
+router.post('/', async (req, res, next) => {
   try {
-    res.json(await policies.update(req.params.id, req.body));
+    const error = validation.validateCreateCoverage(req.body);
+    if (error) {
+      throw helper.apiError(400, error, req);
+    }
+
+    const result = await coverages.create(req.body);
+    res.status(201).json(result);
   } catch (err) {
-    console.error(`Error while updating claims`, err.message);
     next(err);
   }
 });
 
-/* DELETE claims */
-router.delete('/:id', async function(req, res, next) {
+/* PUT coverages */
+router.put('/:id', async (req, res, next) => {
   try {
-    res.json(await policies.remove(req.params.id));
+    const error = validation.validateUpdateCoverage(req.body);
+    if (error) {
+      throw helper.apiError(400, error, req);
+    }
+
+    res.json(await coverages.update(req.params.id, req.body));
   } catch (err) {
-    console.error(`Error while deleting claims`, err.message);
     next(err);
   }
 });
 
+/* DELETE coverages */
+router.delete('/:id', async (req, res, next) => {
+  try {
+    await coverages.remove(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;
