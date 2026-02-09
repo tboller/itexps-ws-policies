@@ -1,4 +1,4 @@
-package insurance.policies;
+package insurance.claims;
 
 import com.intuit.karate.junit5.Karate;
 
