@@ -1,60 +1,63 @@
-function isValidDate(d) {
-  return !isNaN(Date.parse(d));
-}
+const common = require('./common');
 
-function validateCreateClaim(body) {
+const VALID_CLAIM_TYPES = ['Collision','Fire','Health'];
+const VALID_STATUS = ['Submitted','Approved','Rejected'];
 
-  if (!Number.isInteger(body.policy_id))
-    return "policy_id must be integer";
+function validateCreateClaim(body){
 
-  if (!Number.isInteger(body.coverage_id))
-    return "coverage_id must be integer";
+  let err;
 
-  if (!VALID_CLAIM_TYPES.includes(body.claim_type))
-    return "Invalid claim_type value";
+  err = common.requireInteger(body.policy_id,'policy_id');
+  if (err) return err;
 
-  if (
-    typeof body.claim_amount !== "number" ||
-    body.claim_amount <= 0 ||
-    !Number.isFinite(body.claim_amount)
-  )
-    return "claim_amount must be positive number";
+  err = common.requireInteger(body.coverage_id,'coverage_id');
+  if (err) return err;
 
-  if (!body.claim_date || !isValidDate(body.claim_date))
-    return "Invalid claim_date";
+  err = common.requireEnum(body.claim_type,VALID_CLAIM_TYPES,'claim_type');
+  if (err) return err;
+
+  err = common.requirePositiveNumber(body.claim_amount,'claim_amount');
+  if (err) return err;
+
+  err = common.requireDate(body.claim_date,'claim_date');
+  if (err) return err;
 
   return null;
 }
 
-function validateQuery(query) {
+function validateUpdateClaim(body){
+  return common.requireEnum(body.status,VALID_STATUS,'status');
+}
 
-  const allowed = ["policy_id", "claim_type", "page"];
+function validateQuery(query){
 
-  for (const key of Object.keys(query)) {
+  const allowed = ['policy_id','claim_type','page'];
+
+  for (const key of Object.keys(query)){
     if (!allowed.includes(key))
-      return "Claims can only be queried by policy_id or claim_type";
+      return 'Claims can only be queried by policy_id or claim_type';
   }
-  if (!Number.isInteger(body.policy_id))
-    return 'policy_id must be integer';
 
-  if (typeof body.limit_amount !== 'number' || body.limit_amount <= 0)
-    return 'limit_amount must be positive number';
+  let err;
 
-  if (typeof body.deductible !== 'number' || body.deductible < 0)
-    return 'deductible must be non-negative number'
-  
-  if (query.policy_id && !Number.isInteger(Number(query.policy_id)))
-    return "policy_id must be integer";
+  err = common.enforceSingleFilter(query);
+  if (err) return err;
 
-  if (query.page && !Number.isInteger(Number(query.page)))
-    return "page must be integer";
+  if (query.policy_id !== undefined){
+    err = common.requireInteger(query.policy_id,'policy_id');
+    if (err) return err;
+  }
 
-  if (query.claim_type && !VALID_CLAIM_TYPES.includes(query.claim_type))
-    return "Invalid claim_type value";
+  if (query.claim_type !== undefined){
+    err = common.requireEnum(query.claim_type,VALID_CLAIM_TYPES,'claim_type');
+    if (err) return err;
+  }
 
-  return null;
+  return common.validatePage(query.page);
 }
+
 module.exports = {
-    validateCreateClaim,
-    validateQuery
+  validateCreateClaim,
+  validateUpdateClaim,
+  validateQuery
 };

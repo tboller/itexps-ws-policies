@@ -1,79 +1,107 @@
 const express = require('express');
 const router = express.Router();
+
 const helper = require('../helper');
 const coverages = require('../services/coverages');
 const validation = require('../validation/coverages');
+const common = require('../validation/common');
 
-/* GET coverages */
-router.get('/', async (req, res, next) => {
+
+router.get('/', async function(req,res,next){
+
   try {
-    const error = validation.validateQuery(req.query);
-    if (error) {
-      throw helper.apiError(400, error, req);
+
+    const validationError = validation.validateQuery(req.query);
+    if (validationError){
+      throw helper.apiError(400, validationError, req);
     }
 
-    res.json(await coverages.getMultipleCoverages(req.query, req.query.page));
-  } catch (err) {
+    const page = req.query.page ? Number(req.query.page) : 1;
+
+    res.json(
+      await coverages.getMultipleCoverages(req.query,page)
+    );
+
+  } catch(err){
     next(err);
   }
 });
 
-/* GET Coverage by ID */
-router.get('/:id', async (req, res, next) => {
+
+router.get('/:id', async function(req,res,next){
+
   try {
-    const coverage = await coverages.getById(req.params.id);
-    if (!coverage) {
-      throw helper.apiError(404, 'Coverage not found', req);
+
+    const err = common.requireInteger(req.params.id,'coverage_id');
+    if (err){
+      throw helper.apiError(400, err, req);
     }
-    if (!Number.isInteger(Number(req.params.id))) {
-      throw helper.apiError(400,"Invalid ID",req);
-    }    
-    res.json(coverage);
-  } catch (err) {
+
+    res.json(
+      await coverages.getById(Number(req.params.id))
+    );
+
+  } catch(err){
     next(err);
   }
 });
 
-/* POST coverages */
-router.post('/', async (req, res, next) => {
+
+router.post('/', async function(req,res,next){
+
   try {
-    const error = validation.validateCreateCoverage(req.body);
-    if (error) {
-      throw helper.apiError(400, error, req);
+
+    const validationError = validation.validateCreateCoverage(req.body);
+    if (validationError){
+      throw helper.apiError(400, validationError, req);
     }
 
-    const result = await coverages.create(req.body);
-    res.status(201).json(result);
-  } catch (err) {
+    res.status(201).json(await coverages.create(req.body));
+
+  } catch(err){
     next(err);
   }
 });
 
-/* PUT coverages */
-router.put('/:id', async (req, res, next) => {
+
+router.put('/:id', async function(req,res,next){
+
   try {
-    const error = validation.validateUpdateCoverage(req.body);
-    if (error) {
-      throw helper.apiError(400, error, req);
+
+    let err = common.requireInteger(req.params.id,'coverage_id');
+    if (err){
+      throw helper.apiError(400, err, req);
     }
-    if (!Number.isInteger(Number(req.params.id))) {
-      throw helper.apiError(400,"Invalid ID",req);
+
+    const validationError = validation.validateUpdateCoverage(req.body);
+    if (validationError){
+      throw helper.apiError(400, validationError, req);
     }
-    res.json(await coverages.update(req.params.id, req.body));
-  } catch (err) {
+
+    res.json(
+      await coverages.update(Number(req.params.id),req.body)
+    );
+
+  } catch(err){
     next(err);
   }
 });
 
-/* DELETE coverages */
-router.delete('/:id', async (req, res, next) => {
+
+router.delete('/:id', async function(req,res,next){
+
   try {
-    await coverages.remove(req.params.id);
-    if (!Number.isInteger(Number(req.params.id))) {
-      throw helper.apiError(400,"Invalid ID",req);
-    }    
-    res.status(204).send();
-  } catch (err) {
+
+    const err = common.requireInteger(req.params.id,'coverage_id');
+    if (err){
+      throw helper.apiError(400, err, req);
+    }
+
+    await coverages.remove(Number(req.params.id));
+
+    res.json({ message:'Coverage deleted successfully' });
+
+  } catch(err){
     next(err);
   }
 });

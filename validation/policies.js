@@ -1,66 +1,61 @@
-const VALID_POLICY_TYPES = ['Home', 'Auto', 'Life', 'Health'];
-const VALID_STATUSES = ['ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING'];
+const common = require('./common');
 
+const VALID_POLICY_TYPES = ['Home','Auto','Health', 'Life'];
+const VALID_STATUS = ['PENDING','ACTIVE','EXPIRED','CANCELLED'];
 
-function isValidDate(d){
-  return !isNaN(Date.parse(d));
+function validateCreatePolicy(body){
+
+  let err;
+
+  err = common.requireInteger(body.customer_id,'customer_id');
+  if (err) return err;
+
+  err = common.requireEnum(body.policy_type,VALID_POLICY_TYPES,'policy_type');
+  if (err) return err;
+
+  err = common.requireDate(body.start_date,'start_date');
+  if (err) return err;
+
+  err = common.requireDate(body.end_date,'end_date');
+  if (err) return err;
+
+  return null;
 }
 
-function validateCreatePolicy(body) {
-    if (!body.customer_id || !Number.isInteger(body.customer_id)) {
-        return 'customer_id must be an integer';
-    }
+function validateUpdatePolicy(body){
 
-    if (!VALID_POLICY_TYPES.includes(body.policy_type)) {
-        return 'Invalid policy_type value';
-    }
-
-    if (!body.start_date || !body.end_date) {
-        return 'start_date and end_date are required';
-    }
-
-    if (!isValidDate(body.start_date) || !isValidDate(body.end_date))
-    return 'Invalid date format';
-
-    if (new Date(body.end_date) < new Date(body.start_date)) {
-        return 'end_date must be greater than or equal to start_date';
-    }
-
-    return null;
+  return common.requireEnum(body.status,VALID_STATUS,'status');
 }
 
-function validateUpdatePolicy(body) {
-    if (!body.status || !VALID_STATUSES.includes(body.status)) {
-        return 'Invalid status value';
-    }
-    return null;
-}
+function validateQuery(query){
 
-function validateQuery(query) {
-    const allowed = ['customer_id', 'policy_type', 'page'];
-    const keys = Object.keys(query);
+  const allowed = ['customer_id','policy_type','page'];
 
-    for (const key of keys) {
-        if (!allowed.includes(key)) {
-            return 'Policies can only be queried by customer_id or policy_type';
-        }
-    }
+  for (const key of Object.keys(query)){
+    if (!allowed.includes(key))
+      return 'Policies can only be queried by customer_id or policy_type';
+  }
 
-    if (query.customer_id && !Number.isInteger(Number(query.customer_id)))
-    return 'customer_id must be integer';
+  let err;
 
-    if (query.page && !Number.isInteger(Number(query.page)))
-    return 'page must be integer';
+  err = common.enforceSingleFilter(query);
+  if (err) return err;
 
-    if (query.policy_type && !VALID_POLICY_TYPES.includes(query.policy_type)) {
-        return 'Invalid policy_type value';
-    }
+  if (query.customer_id !== undefined){
+    err = common.requireInteger(query.customer_id,'customer_id');
+    if (err) return err;
+  }
 
-    return null;
+  if (query.policy_type !== undefined){
+    err = common.requireEnum(query.policy_type,VALID_POLICY_TYPES,'policy_type');
+    if (err) return err;
+  }
+
+  return common.validatePage(query.page);
 }
 
 module.exports = {
-    validateCreatePolicy,
-    validateUpdatePolicy,
-    validateQuery
+  validateCreatePolicy,
+  validateUpdatePolicy,
+  validateQuery
 };

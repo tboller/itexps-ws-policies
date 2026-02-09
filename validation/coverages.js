@@ -1,82 +1,68 @@
-const VALID_COVERAGE_TYPES = ['Fire', 'Collision', 'Health'];
-const VALID_STATUSES = ['TRUE', 'FALSE'];
+const common = require('./common');
 
-function validateCreateCoverage(body) {
-    if (!body.policy_id || !Number.isInteger(body.policy_id)) {
-        return 'policy_id must be an integer';
-    }
+const VALID_COVERAGE_TYPES = ['Collision','Fire','Health'];
 
-    if (!VALID_COVERAGE_TYPES.includes(body.coverage_type)) {
-        return 'Invalid coverage_type value';
-    }
+function validateCreateCoverage(body){
 
-    return null;
+  let err;
+
+  err = common.requireInteger(body.policy_id,'policy_id');
+  if (err) return err;
+
+  err = common.requireEnum(body.coverage_type,VALID_COVERAGE_TYPES,'coverage_type');
+  if (err) return err;
+
+  err = common.requirePositiveNumber(body.limit_amount,'limit_amount');
+  if (err) return err;
+
+  err = common.requireNonNegativeNumber(body.deductible,'deductible');
+  if (err) return err;
+
+  return null;
 }
 
-function validateUpdateCoverage(body) {
-    if (!body || Object.keys(body).length === 0) {
-        return 'Request body is required';
-    }
+function validateUpdateCoverage(body){
 
-    // Only allow specific fields
-    const allowedFields = ['limit_amount', 'deductible'];
-    const bodyFields = Object.keys(body);
+  let err;
 
-    for (const field of bodyFields) {
-        if (!allowedFields.includes(field)) {
-            return `Invalid field: ${field}`;
-        }
-    }
+  err = common.requirePositiveNumber(body.limit_amount,'limit_amount');
+  if (err) return err;
 
-    // Validate limit_amount
-    if (
-        body.limit_amount === undefined ||
-        typeof body.limit_amount !== 'number' ||
-        body.limit_amount <= 0
-    ) {
-        return 'limit_amount must be a positive number';
-    }
+  err = common.requireNonNegativeNumber(body.deductible,'deductible');
+  if (err) return err;
 
-    // Validate deductible
-    if (
-        body.deductible === undefined ||
-        typeof body.deductible !== 'number' ||
-        body.deductible < 0
-    ) {
-        return 'deductible must be a non-negative number';
-    }
-
-    return null;
+  return null;
 }
 
-function validateQuery(query) {
-    console.log(`query value is ${Object.keys(query)}`);
-    const allowed = ['policy_id', 'coverage_type', 'page'];
-    const keys = Object.keys(query);
+function validateQuery(query){
 
-    for (const key of keys) {
-        if (!allowed.includes(key)) {
-            return 'Coverages can only be queried by policy_id or coverage_type';
-        }
-    }
-    if (!Number.isInteger(body.policy_id))
-    return 'policy_id must be integer';
+  const allowed = ['policy_id','coverage_type','page'];
 
-    if (typeof body.limit_amount !== 'number' || body.limit_amount <= 0)
-    return 'limit_amount must be positive number';
+  for (const key of Object.keys(query)){
+    if (!allowed.includes(key))
+      return 'Coverages can only be queried by policy_id or coverage_type';
+  }
 
-    if (typeof body.deductible !== 'number' || body.deductible < 0)
-    return 'deductible must be non-negative number';
+  let err;
 
-    if (query.coverage_type && !VALID_COVERAGE_TYPES.includes(query.coverage_type)) {
-        return 'Invalid coverage_type value';
-    }
+  err = common.enforceSingleFilter(query);
+  if (err) return err;
 
-    return null;
+  if (query.policy_id !== undefined){
+    err = common.requireInteger(query.policy_id,'policy_id');
+    if (err) return err;
+  }
+
+  if (query.coverage_type !== undefined){
+    err = common.requireEnum(query.coverage_type,VALID_COVERAGE_TYPES,'coverage_type');
+    if (err) return err;
+  }
+
+  return common.validatePage(query.page);
 }
 
 module.exports = {
-    validateCreateCoverage,
-    validateUpdateCoverage,
-    validateQuery
+  validateCreateCoverage,
+  validateUpdateCoverage,
+  validateQuery
 };

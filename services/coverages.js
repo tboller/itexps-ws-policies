@@ -2,78 +2,58 @@ const db = require('./db');
 const helper = require('../helper');
 const config = require('../config');
 
-/**
- * GET Multiple coverages
- */
-async function getMultipleCoverages(query, page = 1){
-  const offset = helper.getOffset(page, config.listPerPage);
-  
-  if (Object.values(query).length === 0) {
+const QUERY_COLUMNS = ['policy_id','coverage_type'];
+
+async function getMultipleCoverages(query,page=1){
+
+  const offset = Number(helper.getOffset(page,config.listPerPage));
+  const limit = Number(config.listPerPage);
+
+  if (Object.keys(query).length === 0){
+
     const rows = await db.query(
       `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active
-      FROM coverages
-       LIMIT ?, ?`,
-      [offset, config.listPerPage]
+       FROM coverages
+       LIMIT ${offset}, ${limit}`
     );
 
-    return {
-      data: helper.emptyOrRows(rows),
-      meta: { page },
-    };
-  } 
-
-  if (
-    Object.keys(query).length === 1 &&
-    (query.coverage_type || query.policy_id)
-  ) {
-    const key = Object.keys(query)[0];
-
-    const rows = await db.query(
-      `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active 
-      FROM coverages
-       WHERE ${key} = ?
-       LIMIT ?, ?`,
-      [query[key], offset, config.listPerPage]
-    );
-
-    return {
-      data: helper.emptyOrRows(rows),
-      meta: { page },
-    };
+    return { data: helper.emptyOrRows(rows), meta:{page} };
   }
-  throw helper.apiError(
-    400,
-    "Coverages can only be queried by coverage_id or policy_id",
+
+  const key = Object.keys(query).find(k => k !== 'page');
+
+  const rows = await db.query(
+    `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active
+     FROM coverages
+     WHERE ${key} = ?
+     LIMIT ${offset}, ${limit}`,
+    [query[key]]
   );
+
+  return { data: helper.emptyOrRows(rows), meta:{page} };
 }
 
-/**
- * GET Coverage by ID
- */
-async function getById(coverageId) {
+async function getById(id){
+
   const rows = await db.query(
-    `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active 
-    FROM coverages
-    WHERE coverage_id = ?
-    `, 
-    [coverageId]
+    `SELECT coverage_id, policy_id, coverage_type, limit_amount, deductible, is_active
+     FROM coverages
+     WHERE coverage_id = ?`,
+    [id]
   );
 
-  if (!rows.length) {
-    throw helper.apiError(404, "Coverage not found");
-  }
+  if (!rows.length)
+    throw helper.apiError(404,'Coverage not found');
 
   return rows[0];
 }
 
-/**
- * Create Coverage
- */
 async function create(coverage){
+
   const result = await db.query(
-    `INSERT INTO coverages 
-    (policy_id, coverage_type, limit_amount, deductible, is_active)
-    VALUES (?, ?, ?, ?, TRUE)`,
+    `INSERT INTO coverages
+     (policy_id, coverage_type, limit_amount, deductible, is_active)
+     VALUES (?, ?, ?, ?, TRUE)`,
     [
       coverage.policy_id,
       coverage.coverage_type,
@@ -82,28 +62,22 @@ async function create(coverage){
     ]
   );
 
-  if (!result.affectedRows)
-    throw helper.apiError(500, 'Failed to create coverage');
-
   return {
     coverage_id: result.insertId,
-    is_active: true
+    is_active:true
   };
 }
 
+async function update(id,coverage){
 
-/**
- * Update Coverage limit or deductible by id
- */
-async function update(coverageid, coverage){
   const result = await db.query(
-    `UPDATE coverages 
+    `UPDATE coverages
      SET limit_amount=?, deductible=?
      WHERE coverage_id=?`,
     [
       coverage.limit_amount,
       coverage.deductible,
-      coverageid
+      id
     ]
   );
 
@@ -111,27 +85,21 @@ async function update(coverageid, coverage){
     throw helper.apiError(404,'Coverage not found');
 
   if (!result.changedRows)
-    throw helper.apiError(409,'Coverage already matches given Limit and Deductible.');
+    throw helper.apiError(409,'Coverage already matches given values');
 
-  return {
-    coverage: coverageid,
-    ...coverage
-  };
+  return { coverage_id:id, ...coverage };
 }
 
-/**
- * Delete Coverage by ID
- */
-async function remove(coverageid){
+async function remove(id){
+
   const result = await db.query(
     `DELETE FROM coverages WHERE coverage_id=?`,
-    [coverageid]
+    [id]
   );
 
   if (!result.affectedRows)
     throw helper.apiError(404,'Coverage not found');
 }
-
 
 module.exports = {
   getMultipleCoverages,
