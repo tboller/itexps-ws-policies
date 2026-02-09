@@ -6,7 +6,7 @@ class PoliciesRunner {
 
     @Karate.Test
     Karate testPolicies() {
-        return Karate.run("policies").relativeTo(getClass());
+        return Karate.run().relativeTo(getClass());
     }
 
 }
