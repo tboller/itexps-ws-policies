@@ -1,71 +1,113 @@
 const express = require('express');
 const router = express.Router();
+
 const helper = require('../helper');
 const policies = require('../services/policies');
 const validation = require('../validation/policies');
+const common = require('../validation/common');
+
 
 /* GET policies */
-router.get('/', async (req, res, next) => {
+router.get('/', async function(req,res,next){
+
   try {
-    const error = validation.validateQuery(req.query);
-    if (error) {
-      throw helper.apiError(400, error, req);
+
+    const validationError = validation.validateQuery(req.query);
+
+    if (validationError){
+      throw helper.apiError(400, validationError, req);
     }
 
-    res.json(await policies.getMultiplePolicies(req.query, req.query.page));
-  } catch (err) {
+    const page = req.query.page ? Number(req.query.page) : 1;
+
+    const result = await policies.getMultiplePolicies(req.query,page);
+
+    res.json(result);
+
+  } catch(err){
     next(err);
   }
 });
+
 
 /* GET policy by ID */
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async function(req,res,next){
+
   try {
-    const policy = await policies.getById(req.params.id);
-    if (!policy) {
-      throw helper.apiError(404, 'Policy not found', req);
+
+    const err = common.requireInteger(req.params.id,'policy_id');
+    if (err){
+      throw helper.apiError(400, err, req);
     }
-    res.json(policy);
-  } catch (err) {
+
+    res.json(await policies.getById(Number(req.params.id)));
+
+  } catch(err){
     next(err);
   }
 });
 
-/* POST policies */
-router.post('/', async (req, res, next) => {
+
+/* POST policy */
+router.post('/', async function(req,res,next){
+
   try {
-    const error = validation.validateCreatePolicy(req.body);
-    if (error) {
-      throw helper.apiError(400, error, req);
+
+    const validationError = validation.validateCreatePolicy(req.body);
+
+    if (validationError){
+      throw helper.apiError(400, validationError, req);
     }
 
-    const result = await policies.create(req.body);
-    res.status(201).json(result);
-  } catch (err) {
+    res.status(201).json(await policies.create(req.body));
+
+  } catch(err){
     next(err);
   }
 });
 
-/* PUT policies */
-router.put('/:id', async (req, res, next) => {
+
+/* PUT policy */
+router.put('/:id', async function(req,res,next){
+
   try {
-    const error = validation.validateUpdatePolicy(req.body);
-    if (error) {
-      throw helper.apiError(400, error, req);
+
+    let err = common.requireInteger(req.params.id,'policy_id');
+    if (err){
+      throw helper.apiError(400, err, req);
     }
 
-    res.json(await policies.update(req.params.id, req.body));
-  } catch (err) {
+    const validationError = validation.validateUpdatePolicy(req.body);
+
+    if (validationError){
+      throw helper.apiError(400, validationError, req);
+    }
+
+    res.json(
+      await policies.update(Number(req.params.id),req.body)
+    );
+
+  } catch(err){
     next(err);
   }
 });
 
-/* DELETE policies */
-router.delete('/:id', async (req, res, next) => {
+
+/* DELETE policy */
+router.delete('/:id', async function(req,res,next){
+
   try {
-    await policies.remove(req.params.id);
-    res.status(204).send();
-  } catch (err) {
+
+    const err = common.requireInteger(req.params.id,'policy_id');
+    if (err){
+      throw helper.apiError(400, err, req);
+    }
+
+    await policies.remove(Number(req.params.id));
+
+    res.json({ message:'Policy deleted successfully' });
+
+  } catch(err){
     next(err);
   }
 });
