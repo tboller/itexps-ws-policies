@@ -59,6 +59,14 @@ function validateQuery(query) {
             return 'Coverages can only be queried by policy_id or coverage_type';
         }
     }
+    if (!Number.isInteger(body.policy_id))
+    return 'policy_id must be integer';
+
+    if (typeof body.limit_amount !== 'number' || body.limit_amount <= 0)
+    return 'limit_amount must be positive number';
+
+    if (typeof body.deductible !== 'number' || body.deductible < 0)
+    return 'deductible must be non-negative number';
 
     if (query.coverage_type && !VALID_COVERAGE_TYPES.includes(query.coverage_type)) {
         return 'Invalid coverage_type value';

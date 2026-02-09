@@ -25,6 +25,9 @@ router.get('/:id', async (req, res, next) => {
     if (!policy) {
       throw helper.apiError(404, 'Policy not found', req);
     }
+    if (!Number.isInteger(Number(req.params.id))) {
+      throw helper.apiError(400,"Invalid ID",req);
+    }    
     res.json(policy);
   } catch (err) {
     next(err);
@@ -53,7 +56,9 @@ router.put('/:id', async (req, res, next) => {
     if (error) {
       throw helper.apiError(400, error, req);
     }
-
+    if (!Number.isInteger(Number(req.params.id))) {
+      throw helper.apiError(400,"Invalid ID",req);
+    }
     res.json(await policies.update(req.params.id, req.body));
   } catch (err) {
     next(err);
@@ -64,6 +69,9 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     await policies.remove(req.params.id);
+    if (!Number.isInteger(Number(req.params.id))) {
+      throw helper.apiError(400,"Invalid ID",req);
+    }    
     res.status(204).send();
   } catch (err) {
     next(err);

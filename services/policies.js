@@ -12,7 +12,8 @@ async function getMultiplePolicies(query, page = 1) {
     const rows = await db.query(
       `SELECT customer_id, policy_type, start_date, end_date, status 
        FROM policies 
-       LIMIT ${offset},${config.listPerPage}`
+       LIMIT ?, ?`,
+      [offset, config.listPerPage]
     );
 
     return {
@@ -31,9 +32,9 @@ async function getMultiplePolicies(query, page = 1) {
       `
       SELECT policy_id, customer_id, policy_type, start_date, end_date, status
       FROM policies
-      WHERE ${key} = '${query[key]}'
-      LIMIT ${offset},${config.listPerPage}
-      `
+       WHERE ${key} = ?
+       LIMIT ?, ?`,
+      [query[key], offset, config.listPerPage]
     );
 
     return {
@@ -56,8 +57,8 @@ async function getById(policyId) {
     `
     SELECT policy_id, customer_id, policy_type, start_date, end_date, status
     FROM policies
-    WHERE policy_id = ${policyId}
-    `
+    WHERE policy_id = ?
+    `, [policyId]
   );
 
   if (!rows.length) {
@@ -73,13 +74,18 @@ async function getById(policyId) {
 async function create(policy) {
   const result = await db.query(
     `INSERT INTO policies 
-    (customer_id, policy_type, start_date, end_date, status) VALUES
-    (${policy.customer_id}, '${policy.policy_type}', '${policy.start_date}', '${policy.end_date}', 'PENDING')`
+     (customer_id, policy_type, start_date, end_date, status)
+     VALUES (?, ?, ?, ?, 'PENDING')`,
+    [
+      policy.customer_id,
+      policy.policy_type,
+      policy.start_date,
+      policy.end_date
+    ]
   );
 
-  if (!result.affectedRows) {
-    throw helper.apiError(500, 'Failed to create policy');
-  }
+  if (!result.affectedRows)
+    throw helper.apiError(500,'Failed to create policy');
 
   return {
     policy_id: result.insertId,
@@ -121,7 +127,7 @@ async function update(policy_id, policy) {
  */
 async function remove(id) {
   const result = await db.query(
-    `DELETE FROM policies WHERE policy_id = ${id}`
+    `DELETE FROM policies WHERE policy_id = ?`, [id]
   );
 
   if (!result.affectedRows) {

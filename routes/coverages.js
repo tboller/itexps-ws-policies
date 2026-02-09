@@ -25,6 +25,9 @@ router.get('/:id', async (req, res, next) => {
     if (!coverage) {
       throw helper.apiError(404, 'Coverage not found', req);
     }
+    if (!Number.isInteger(Number(req.params.id))) {
+      throw helper.apiError(400,"Invalid ID",req);
+    }    
     res.json(coverage);
   } catch (err) {
     next(err);
@@ -53,7 +56,9 @@ router.put('/:id', async (req, res, next) => {
     if (error) {
       throw helper.apiError(400, error, req);
     }
-
+    if (!Number.isInteger(Number(req.params.id))) {
+      throw helper.apiError(400,"Invalid ID",req);
+    }
     res.json(await coverages.update(req.params.id, req.body));
   } catch (err) {
     next(err);
@@ -64,6 +69,9 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     await coverages.remove(req.params.id);
+    if (!Number.isInteger(Number(req.params.id))) {
+      throw helper.apiError(400,"Invalid ID",req);
+    }    
     res.status(204).send();
   } catch (err) {
     next(err);

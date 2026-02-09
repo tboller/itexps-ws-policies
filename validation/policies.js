@@ -1,6 +1,11 @@
 const VALID_POLICY_TYPES = ['Home', 'Auto', 'Life', 'Health'];
 const VALID_STATUSES = ['ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING'];
 
+
+function isValidDate(d){
+  return !isNaN(Date.parse(d));
+}
+
 function validateCreatePolicy(body) {
     if (!body.customer_id || !Number.isInteger(body.customer_id)) {
         return 'customer_id must be an integer';
@@ -13,6 +18,9 @@ function validateCreatePolicy(body) {
     if (!body.start_date || !body.end_date) {
         return 'start_date and end_date are required';
     }
+
+    if (!isValidDate(body.start_date) || !isValidDate(body.end_date))
+    return 'Invalid date format';
 
     if (new Date(body.end_date) < new Date(body.start_date)) {
         return 'end_date must be greater than or equal to start_date';
@@ -37,6 +45,12 @@ function validateQuery(query) {
             return 'Policies can only be queried by customer_id or policy_type';
         }
     }
+
+    if (query.customer_id && !Number.isInteger(Number(query.customer_id)))
+    return 'customer_id must be integer';
+
+    if (query.page && !Number.isInteger(Number(query.page)))
+    return 'page must be integer';
 
     if (query.policy_type && !VALID_POLICY_TYPES.includes(query.policy_type)) {
         return 'Invalid policy_type value';
