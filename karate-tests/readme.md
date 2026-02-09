@@ -1,1 +1,0 @@
-This folder is where we would add the karate code. 
